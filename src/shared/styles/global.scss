@@ -1,0 +1,58 @@
+@import "./global/variables";
+@import "./global/container";
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: $color-bg;
+  background-image:
+    radial-gradient(1400px 1100px at 50% 105%, rgba($color-glow-blue, 0.34) 0%, rgba($color-glow-violet, 0.24) 48%, rgba($color-bg, 0) 78%),
+    linear-gradient(180deg, $color-overlay-60 0%, rgba($color-black, 0) 45%),
+    linear-gradient(180deg, rgba($color-bg, 0) 0%, rgba($color-bg, 1) 100%);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: 100% 100%;
+  color: $color-text;
+  font-family: $ff-base;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  overflow: clip;
+}
+
+video,
+canvas {
+  overflow: clip;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+main {
+  flex: 1;
+}

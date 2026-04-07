@@ -1,0 +1,65 @@
+@use "./global/variables" as *;
+@use "./global/container" as *;
+
+.header {
+    height: 96px;
+}
+
+.header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 96px;
+    gap: $space-xl;
+}
+
+.header__logo {
+    height: 32px;
+    width: 144px;
+    display: block;
+}
+
+.header__nav {
+    display: flex;
+    gap: $space-xl;
+}
+
+.header__link {
+    font-family: $ff-accent;
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 32px;
+    color: $color-text-muted;
+    display: inline-flex;
+    align-items: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color $transition-200;
+}
+
+.header__link:hover {
+    color: $color-text;
+}
+
+.header__right {
+    display: flex;
+    align-items: center;
+    gap: $space-lg;
+}
+
+.header__search {
+    width: 656px;
+    height: 48px;
+    background: $color-white-08;
+    border: 1px solid $color-border;
+    border-radius: $radius-md;
+    padding: 0 16px;
+    font-size: 18px;
+    color: $color-text;
+    outline: none;
+}
+
+.header__search::placeholder {
+    color: $color-text-muted;
+}

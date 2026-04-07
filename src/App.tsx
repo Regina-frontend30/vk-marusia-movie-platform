@@ -1,5 +1,12 @@
+import Header from "./widgets/header/Header";
+
 function App() {
-  return <div>VK Marusia</div>;
+  return (
+    <>
+      <Header />
+      <main>Home page</main>
+    </>
+  );
 }
 
 export default App;
