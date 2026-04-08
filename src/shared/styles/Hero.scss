@@ -1,0 +1,128 @@
+@use "./global/variables" as *;
+
+.hero {
+    position: relative;
+}
+
+.hero__content {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 600px) minmax(0, 680px);
+    gap: 0;
+}
+
+.hero__info {
+    max-width: 600px;
+    padding: 106px 8px 158px 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.hero__meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.hero__rating {
+    display: inline-flex;
+    align-items: center;
+    height: 28px;
+    padding: 0 10px;
+    background: $color-success;
+    color: $color-text-dark;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.hero__year,
+.hero__genres,
+.hero__runtime {
+    font-size: 18px;
+    color: $color-text-70;
+}
+
+.hero__title {
+    font-size: 48px;
+    line-height: 56px;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+.hero__description {
+    font-size: 24px;
+    line-height: 32px;
+    color: $color-text-muted;
+    margin-bottom: 60px;
+}
+
+.hero__actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.hero__button {
+    height: 56px;
+    padding: 0 32px;
+    border-radius: 999px;
+    border: none;
+    font-weight: 700;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.hero__button--primary {
+    background: linear-gradient(135deg, #6ea8ff, #3b82f6);
+    color: white;
+}
+
+.hero__button--secondary {
+    background: #333;
+    color: white;
+}
+
+.hero__icons {
+    display: flex;
+    gap: 12px;
+}
+
+.hero__icon-btn {
+    width: 68px;
+    height: 56px;
+    border-radius: 28px;
+
+    background: #333333;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.hero__icon-btn:hover {
+    background: #444;
+}
+
+.hero__icon-btn:active {
+    transform: translateY(1px);
+}
+
+.hero__icon-btn svg {
+    width: 24px;
+    height: 24px;
+    fill: #fff;
+}
+
+.hero__image {
+    width: 100%;
+    max-width: 680px;
+    border-radius: 16px;
+    object-fit: cover;
+}
