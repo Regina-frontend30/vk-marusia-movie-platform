@@ -1,0 +1,65 @@
+@use "../../shared/styles/global/variables" as *;
+
+.top-movies {
+    max-width: 1280px;
+    margin: 64px auto 0;
+}
+
+.home__title {
+    font-family: $ff-accent;
+    font-weight: 700;
+    font-size: 40px;
+    line-height: 48px;
+    margin: 0 0 64px 0;
+}
+
+
+.home__list {
+    display: grid;
+    grid-template-columns: repeat(5, 224px);
+    gap: 64px 24px;
+
+    justify-content: center;
+}
+
+
+.movie-card {
+    position: relative;
+    width: 224px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.movie-card:hover {
+    transform: translateY(-4px);
+}
+
+
+.movie-card__image {
+    width: 100%;
+    height: 336px;
+    border-radius: 16px;
+    object-fit: cover;
+}
+
+.movie-card__position {
+    position: absolute;
+    top: -12px;
+    left: -12px;
+
+    min-width: 62px;
+    height: 48px;
+    padding: 8px 24px;
+
+    background: #fff;
+    border-radius: 50px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-family: $ff-accent;
+    font-weight: 700;
+    font-size: 24px;
+    color: $color-brand;
+}
