@@ -1,5 +1,5 @@
-@use "./global/variables" as *;
-@use "./global/container" as *;
+@use "../../shared/styles/global/variables" as *;
+@use "../../shared/styles/global/container" as *;
 
 .header {
     height: 96px;

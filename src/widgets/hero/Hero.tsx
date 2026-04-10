@@ -1,4 +1,4 @@
-import "../../shared/styles/Hero.scss";
+import "./Hero.scss";
 import poster from "../../assets/images/hero.jpg";
 import spriteUrl from "../../assets/sprite/sprite.svg";
 

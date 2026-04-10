@@ -1,15 +1,13 @@
-import Header from "./widgets/header/Header";
+import MainLayout from "./app/layouts/MainLayout";
 import Hero from "./widgets/hero/Hero";
 import TopMovies from "./widgets/top-movies/TopMovies";
 
 function App() {
   return (
-    <>
-      <Header />
+    <MainLayout>
       <Hero />
       <TopMovies />
-      <main>Home page</main>
-    </>
+    </MainLayout>
   );
 }
 
