@@ -1,12 +1,10 @@
 import MainLayout from "./app/layouts/MainLayout";
-import Hero from "./widgets/hero/Hero";
-import TopMovies from "./widgets/top-movies/TopMovies";
+import HomePage from "./pages/home/HomePage";
 
 function App() {
   return (
     <MainLayout>
-      <Hero />
-      <TopMovies />
+      <HomePage />
     </MainLayout>
   );
 }
