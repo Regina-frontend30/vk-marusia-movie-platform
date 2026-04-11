@@ -9,7 +9,12 @@ export default function TopMovies() {
 
       <div className="home__list">
         {Array.from({ length: 10 }).map((_, index) => (
-          <MovieCard key={index} image={poster} position={index + 1} />
+          <MovieCard
+            key={index}
+            title="Фильм"
+            poster={poster}
+            position={index + 1}
+          />
         ))}
       </div>
     </section>
