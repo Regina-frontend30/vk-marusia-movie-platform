@@ -16,10 +16,8 @@
 
 .home__list {
     display: grid;
-    grid-template-columns: repeat(5, 224px);
-    gap: 64px 24px;
-
-    justify-content: center;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 32px 20px;
 }
 
 

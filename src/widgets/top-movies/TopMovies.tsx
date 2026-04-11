@@ -1,5 +1,6 @@
-import "./TopMovies.scss";
+import MovieCard from "../../entities/movie/MovieCard";
 import poster from "../../assets/images/home.png";
+import "./TopMovies.scss";
 
 export default function TopMovies() {
   return (
@@ -7,11 +8,8 @@ export default function TopMovies() {
       <h2 className="home__title">Топ-10 фильмов</h2>
 
       <div className="home__list">
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((item) => (
-          <div className="movie-card" key={item}>
-            <span className="movie-card__position">{item}</span>
-            <img className="movie-card__image" src={poster} alt="" />
-          </div>
+        {Array.from({ length: 10 }).map((_, index) => (
+          <MovieCard key={index} image={poster} position={index + 1} />
         ))}
       </div>
     </section>

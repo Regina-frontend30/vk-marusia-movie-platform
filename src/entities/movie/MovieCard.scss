@@ -1,0 +1,29 @@
+.movie-card {
+    position: relative;
+    width: 224px;
+}
+
+.movie-card__image {
+    width: 100%;
+    height: 336px;
+    border-radius: 16px;
+    object-fit: cover;
+}
+
+.movie-card__position {
+    position: absolute;
+    top: -12px;
+    left: -12px;
+
+    width: 48px;
+    height: 36px;
+
+    background: white;
+    border-radius: 20px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-weight: 700;
+}
