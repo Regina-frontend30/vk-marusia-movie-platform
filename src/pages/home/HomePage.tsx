@@ -1,7 +1,7 @@
 import Hero from "../../widgets/hero/Hero";
 import TopMovies from "../../widgets/top-movies/TopMovies";
 
-export default function HomePage() {
+function HomePage() {
   return (
     <>
       <Hero />
@@ -9,3 +9,5 @@ export default function HomePage() {
     </>
   );
 }
+
+export default HomePage;

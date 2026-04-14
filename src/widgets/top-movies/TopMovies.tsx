@@ -1,22 +1,20 @@
-import MovieCard from "../../entities/movie/MovieCard";
-import poster from "../../assets/images/home.png";
 import "./TopMovies.scss";
 
-export default function TopMovies() {
+import MovieCard from "../../entities/movie/MovieCard";
+import { movies } from "../../entities/movie/model/movies";
+
+function TopMovies() {
   return (
     <section className="top-movies">
       <h2 className="home__title">Топ-10 фильмов</h2>
 
       <div className="home__list">
-        {Array.from({ length: 10 }).map((_, index) => (
-          <MovieCard
-            key={index}
-            title="Фильм"
-            poster={poster}
-            position={index + 1}
-          />
+        {movies.map((movie) => (
+          <MovieCard key={movie.id} movie={movie} />
         ))}
       </div>
     </section>
   );
 }
+
+export default TopMovies;

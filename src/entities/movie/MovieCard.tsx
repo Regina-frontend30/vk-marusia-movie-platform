@@ -1,17 +1,20 @@
 import "./MovieCard.scss";
+import type { Movie } from "./model/movies";
 
 type Props = {
-  title: string;
-  poster: string;
-  position: number;
+  movie: Movie;
 };
 
-export default function MovieCard({ title, poster, position }: Props) {
+export default function MovieCard({ movie }: Props) {
   return (
     <div className="movie-card">
-      <span className="movie-card__position">{position}</span>
+      <span className="movie-card__position">{movie.id}</span>
 
-      <img className="movie-card__image" src={poster} alt={title} />
+      <img
+        className="movie-card__image"
+        src={movie.image}
+        alt={movie.title}
+      />
     </div>
   );
 }
