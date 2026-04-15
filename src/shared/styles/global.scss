@@ -56,3 +56,11 @@ canvas {
 main {
   flex: 1;
 }
+
+.layout {
+  min-height: 100vh;
+}
+
+.layout__main {
+  min-height: calc(100vh - 160px);
+}
