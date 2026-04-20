@@ -1,20 +1,19 @@
+import { Link } from "react-router-dom";
 import "./MovieCard.scss";
-import type { Movie } from "./model/movies";
 
 type Props = {
-  movie: Movie;
+  id: number;
+  title: string;
+  poster: string;
+  position: number;
 };
 
-export default function MovieCard({ movie }: Props) {
+export default function MovieCard({ id, title, poster, position }: Props) {
   return (
-    <div className="movie-card">
-      <span className="movie-card__position">{movie.id}</span>
+    <Link to={`/movie/${id}`} className="movie-card">
+      <span className="movie-card__position">{position}</span>
 
-      <img
-        className="movie-card__image"
-        src={movie.image}
-        alt={movie.title}
-      />
-    </div>
+      <img className="movie-card__image" src={poster} alt={title} />
+    </Link>
   );
 }
