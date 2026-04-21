@@ -1,15 +1,37 @@
 import { useParams } from "react-router-dom";
-import { useState } from "react";
-import { movies } from "../../entities/movie/model/movies";
+import { useEffect, useState } from "react";
+import type { Movie } from "../../shared/types/movie";
 import "./MoviePage.scss";
 import spriteUrl from "../../assets/sprite/sprite.svg";
+
+const BASE_URL = "https://cinemaguide.skillbox.cc";
 
 export default function MoviePage() {
   const { id } = useParams<{ id: string }>();
 
-  const movie = movies.find((m) => m.id === Number(id));
-
+  const [movie, setMovie] = useState<Movie | null>(null);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadMovie = async () => {
+      try {
+        const res = await fetch(`${BASE_URL}/movie/${id}`);
+        const data = await res.json();
+        setMovie(data);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadMovie();
+  }, [id]);
+
+  if (loading) {
+    return <div className="container">Загрузка...</div>;
+  }
 
   if (!movie) {
     return <div className="container">Фильм не найден</div>;
@@ -20,35 +42,29 @@ export default function MoviePage() {
       <div className="movie-page__hero">
         <div className="movie-page__info">
           <div className="movie-page__meta">
-            <span className="movie-page__rating">★ {movie.rating}</span>
-            <span className="movie-page__year">{movie.year}</span>
-            <span className="movie-page__genres">{movie.genre}</span>
-            <span className="movie-page__runtime">{movie.runtime}</span>
+            <span className="movie-page__rating">★ {movie.tmdbRating}</span>
+            <span className="movie-page__year">{movie.releaseYear}</span>
+            <span className="movie-page__genres">{movie.genres?.[0]}</span>
+            <span className="movie-page__runtime">{movie.runtime} мин</span>
           </div>
 
           <h1 className="movie-page__title">{movie.title}</h1>
 
-          <p className="movie-page__plot">{movie.description}</p>
+          <p className="movie-page__plot">{movie.plot}</p>
 
           <div className="movie-page__actions">
-            {/* ТРЕЙЛЕР */}
-            <button
-              className="movie-page__button movie-page__button--primary"
-              onClick={() => alert("Трейлер скоро будет")}
-            >
+            <button className="movie-page__button movie-page__button--primary">
               Трейлер
             </button>
 
-            {/* ИЗБРАННОЕ */}
             <button
               type="button"
               className={`movie-page__icon-btn ${
                 isFavorite ? "movie-page__icon-btn--active" : ""
               }`}
-              aria-label="В избранное"
               onClick={() => setIsFavorite(!isFavorite)}
             >
-              <svg className="movie-page__icon" aria-hidden="true">
+              <svg className="movie-page__icon">
                 <use
                   href={`${spriteUrl}#${
                     isFavorite ? "icon-favorites-filled" : "icon-favorites"
@@ -59,47 +75,30 @@ export default function MoviePage() {
           </div>
         </div>
 
-        {/* IMAGE */}
         <img
           className="movie-page__image"
-          src={movie.image}
+          src={movie.backdropUrl}
           alt={movie.title}
         />
       </div>
 
-      {/* ABOUT */}
       <div className="movie-page__about">
         <h2 className="movie-page__about-title">О фильме</h2>
 
         <div className="movie-page__about-rows">
           <div className="movie-page__about-row">
-            <span>Язык оригинала</span>
-            <span>Русский</span>
+            <span>Год</span>
+            <span>{movie.releaseYear}</span>
           </div>
 
           <div className="movie-page__about-row">
-            <span>Бюджет</span>
-            <span>250 000 руб.</span>
+            <span>Жанр</span>
+            <span>{movie.genres?.join(", ")}</span>
           </div>
 
           <div className="movie-page__about-row">
-            <span>Выручка</span>
-            <span>2 835 000 руб.</span>
-          </div>
-
-          <div className="movie-page__about-row">
-            <span>Режиссёр</span>
-            <span>Игорь Масленников</span>
-          </div>
-
-          <div className="movie-page__about-row">
-            <span>Продакшен</span>
-            <span>Ленфильм</span>
-          </div>
-
-          <div className="movie-page__about-row">
-            <span>Награды</span>
-            <span>Топ-250, 33 место</span>
+            <span>Длительность</span>
+            <span>{movie.runtime} мин</span>
           </div>
         </div>
       </div>
