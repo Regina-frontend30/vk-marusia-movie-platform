@@ -1,4 +1,5 @@
 import { useParams } from "react-router-dom";
+import { useState } from "react";
 import { movies } from "../../entities/movie/model/movies";
 import "./MoviePage.scss";
 import spriteUrl from "../../assets/sprite/sprite.svg";
@@ -8,15 +9,15 @@ export default function MoviePage() {
 
   const movie = movies.find((m) => m.id === Number(id));
 
+  const [isFavorite, setIsFavorite] = useState(false);
+
   if (!movie) {
     return <div className="container">Фильм не найден</div>;
   }
 
   return (
     <section className="movie-page container">
-      {}
       <div className="movie-page__hero">
-        {}
         <div className="movie-page__info">
           <div className="movie-page__meta">
             <span className="movie-page__rating">★ {movie.rating}</span>
@@ -30,23 +31,35 @@ export default function MoviePage() {
           <p className="movie-page__plot">{movie.description}</p>
 
           <div className="movie-page__actions">
-            <button className="movie-page__button movie-page__button--primary">
+            {/* ТРЕЙЛЕР */}
+            <button
+              className="movie-page__button movie-page__button--primary"
+              onClick={() => alert("Трейлер скоро будет")}
+            >
               Трейлер
             </button>
 
+            {/* ИЗБРАННОЕ */}
             <button
               type="button"
-              className="movie-page__icon-btn"
+              className={`movie-page__icon-btn ${
+                isFavorite ? "movie-page__icon-btn--active" : ""
+              }`}
               aria-label="В избранное"
+              onClick={() => setIsFavorite(!isFavorite)}
             >
               <svg className="movie-page__icon" aria-hidden="true">
-                <use href={`${spriteUrl}#icon-favorites`} />
+                <use
+                  href={`${spriteUrl}#${
+                    isFavorite ? "icon-favorites-filled" : "icon-favorites"
+                  }`}
+                />
               </svg>
             </button>
           </div>
         </div>
 
-        {/* RIGHT */}
+        {/* IMAGE */}
         <img
           className="movie-page__image"
           src={movie.image}
