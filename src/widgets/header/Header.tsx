@@ -11,22 +11,17 @@ export default function Header() {
           <img src={logo} alt="VK Marusia" className="header__logo" />
         </Link>
 
-        {}
         <nav className="header__nav">
-          <Link to="/" className="header__link">
-            Главная
-          </Link>
-
-          <Link to="/genres" className="header__link">
-            Жанры
-          </Link>
+          <Link to="/" className="header__link">Главная</Link>
+          <Link to="/genres" className="header__link">Жанры</Link>
         </nav>
 
-        {}
         <div className="header__right">
           <input className="header__search" placeholder="Поиск" />
 
-          <button className="header__link">Войти</button>
+          <Link to="/login" className="header__link">
+            Войти
+          </Link>
         </div>
       </div>
     </header>
