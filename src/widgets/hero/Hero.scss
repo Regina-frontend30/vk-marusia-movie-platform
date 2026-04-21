@@ -1,23 +1,23 @@
 @use "../../shared/styles/global/variables" as *;
 
 .hero {
-    position: relative;
+    margin-bottom: 56px;
 }
 
 .hero__content {
-    max-width: 1280px;
-    margin: 0 auto;
     display: grid;
-    grid-template-columns: minmax(0, 600px) minmax(0, 680px);
-    gap: 0;
+    grid-template-columns: minmax(0, 520px) minmax(0, 680px);
+    gap: 80px;
+    align-items: start;
 }
 
 .hero__info {
-    max-width: 600px;
-    padding: 106px 8px 158px 0;
     display: flex;
     flex-direction: column;
+    padding: 80px 0 120px;
 }
+
+/* META */
 
 .hero__meta {
     display: flex;
@@ -27,13 +27,9 @@
 }
 
 .hero__rating {
-    display: inline-flex;
-    align-items: center;
-    height: 28px;
-    padding: 0 10px;
+    padding: 4px 10px;
     background: $color-success;
-    color: $color-text-dark;
-    border-radius: 999px;
+    border-radius: 20px;
     font-weight: 700;
     font-size: 14px;
 }
@@ -41,23 +37,26 @@
 .hero__year,
 .hero__genres,
 .hero__runtime {
-    font-size: 18px;
+    font-size: 16px;
     color: $color-text-70;
 }
 
+/* TITLE + TEXT */
+
 .hero__title {
-    font-size: 48px;
-    line-height: 56px;
+    font-size: 42px;
     font-weight: 700;
     margin-bottom: 16px;
 }
 
 .hero__description {
-    font-size: 24px;
-    line-height: 32px;
+    font-size: 18px;
     color: $color-text-muted;
-    margin-bottom: 60px;
+    margin-bottom: 40px;
+    max-width: 500px;
 }
+
+/* ACTIONS */
 
 .hero__actions {
     display: flex;
@@ -66,24 +65,25 @@
 }
 
 .hero__button {
-    height: 56px;
-    padding: 0 32px;
-    border-radius: 999px;
+    height: 48px;
+    padding: 0 24px;
+    border-radius: 24px;
     border: none;
-    font-weight: 700;
-    font-size: 18px;
     cursor: pointer;
+    font-weight: 600;
 }
 
 .hero__button--primary {
-    background: linear-gradient(135deg, #6ea8ff, #3b82f6);
+    background: $color-accent;
     color: white;
 }
 
 .hero__button--secondary {
-    background: #333;
+    background: $color-surface-muted;
     color: white;
 }
+
+/* ICONS */
 
 .hero__icons {
     display: flex;
@@ -91,34 +91,28 @@
 }
 
 .hero__icon-btn {
-    width: 68px;
-    height: 56px;
-    border-radius: 28px;
-
-    background: #333333;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: $color-surface-alt;
+    border: 1px solid $color-black-40;
+    padding: 0;
+    color: $color-text;
     display: flex;
     align-items: center;
     justify-content: center;
-
     cursor: pointer;
-    transition: 0.2s ease;
-}
-
-.hero__icon-btn:hover {
-    background: #444;
-}
-
-.hero__icon-btn:active {
-    transform: translateY(1px);
 }
 
 .hero__icon-btn svg {
-    width: 24px;
-    height: 24px;
-    fill: #fff;
+    width: 20px;
+    height: 20px;
+    display: block;
+    color: currentColor;
+    fill: currentColor;
 }
+
+/* IMAGE */
 
 .hero__image {
     width: 100%;
