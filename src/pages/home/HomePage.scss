@@ -1,0 +1,56 @@
+@use "../../styles/global/variables" as *;
+@use "../../styles/global/mixins" as *;
+
+.home__title {
+    font-family: $ff-accent;
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 32px;
+    letter-spacing: 0;
+    margin: 0 0 24px 0;
+}
+
+.home__list {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 20px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    margin: 0;
+    padding: 12px 12px 0 12px;
+    scrollbar-width: none;
+    scroll-padding-left: 12px;
+}
+
+.home__list::-webkit-scrollbar {
+    display: none;
+}
+
+.home__list .movie-card {
+    flex: 0 0 224px;
+    scroll-snap-align: start;
+}
+
+.home__list .movie-card__image {
+    height: 336px;
+}
+
+@include desktop {
+    .home__title {
+        font-size: 40px;
+        line-height: 48px;
+        margin: 0 0 64px 0;
+    }
+
+    .home__list {
+        display: grid;
+        grid-template-columns: repeat(5, 224px);
+        gap: $space-xxl $space-xl;
+        overflow: visible;
+        padding: 0;
+    }
+
+    .home__list .movie-card {
+        width: 224px;
+    }
+}
