@@ -1,3 +1,5 @@
+import type { Movie } from "../types/movie";
+
 const BASE_URL = "https://cinemaguide.skillbox.cc";
 
 export async function getRandomMovie() {
@@ -18,4 +20,18 @@ export async function getTopMovies() {
     }
 
     return res.json();
+}
+
+export async function getMoviesByGenre(
+    genre: string
+): Promise<Movie[]> {
+    const res = await fetch(
+        `${BASE_URL}/movie?genre=${encodeURIComponent(genre)}`
+    );
+
+    if (!res.ok) {
+        throw new Error("Ошибка загрузки фильмов");
+    }
+
+    return res.json() as Promise<Movie[]>;
 }
