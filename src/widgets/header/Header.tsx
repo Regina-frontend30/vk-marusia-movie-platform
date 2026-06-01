@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 
 import "./Header.scss";
 
@@ -18,13 +18,24 @@ export default function Header() {
           </Link>
 
           <nav className="header__nav">
-            <Link to="/" className="header__link">
+            <NavLink
+              to="/"
+              end
+              className={({ isActive }) =>
+                isActive ? "header__link header__link--active" : "header__link"
+              }
+            >
               Главная
-            </Link>
+            </NavLink>
 
-            <Link to="/genres" className="header__link">
+            <NavLink
+              to="/genres"
+              className={({ isActive }) =>
+                isActive ? "header__link header__link--active" : "header__link"
+              }
+            >
               Жанры
-            </Link>
+            </NavLink>
           </nav>
 
           <div className="header__right">

@@ -25,6 +25,9 @@
 }
 
 .header__link {
+    position: relative;
+    text-decoration: none;
+
     font-family: $ff-accent;
     font-weight: 400;
     font-size: 24px;
@@ -40,6 +43,23 @@
 
 .header__link:hover {
     color: $color-text;
+}
+
+.header__link--active {
+    color: $color-text;
+}
+
+.header__link--active::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -14px;
+
+    width: 100%;
+    height: 3px;
+
+    background: $color-highlight;
+    border-radius: 2px;
 }
 
 .header__right {
