@@ -100,6 +100,33 @@
     border-radius: 24px;
 }
 
+.genres-page__more-wrap {
+    display: flex;
+    justify-content: center;
+
+    margin-top: 64px;
+}
+
+.genres-page__more {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 220px;
+    height: 56px;
+    padding: 0 48px;
+    border-radius: 9999px;
+    border: 1px solid transparent;
+    background: rgb(103, 165, 235);
+    color: #ffffff;
+    cursor: pointer;
+    font-family: "Play", Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 24px;
+    letter-spacing: 0;
+    white-space: nowrap;
+}
+
 @media (max-width: 1439px) {
     .genres-page {
         padding-top: 24px;
@@ -129,6 +156,10 @@
 
     .genres-page__movie-card {
         width: 100%;
+    }
+
+    .genres-page__more-wrap {
+        margin-top: 40px;
     }
 }
 
