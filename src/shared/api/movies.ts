@@ -35,3 +35,19 @@ export async function getMoviesByGenre(
 
     return res.json() as Promise<Movie[]>;
 }
+
+export async function searchMovies(
+    query: string,
+    signal?: AbortSignal
+): Promise<Movie[]> {
+    const res = await fetch(
+        `${BASE_URL}/movie?title=${encodeURIComponent(query)}`,
+        { signal }
+    );
+
+    if (!res.ok) {
+        throw new Error("Ошибка поиска");
+    }
+
+    return res.json() as Promise<Movie[]>;
+}
