@@ -6,6 +6,7 @@ import "./Header.scss";
 import logo from "../../assets/logo/logo.svg";
 import AuthModal from "../../features/auth/AuthModal";
 import { useMovieSearchDropdown } from "../../hooks/useMovieSearchDropdown";
+import { useAuth } from "../../app/providers/useAuth";
 
 function formatRuntime(runtime: number) {
   if (!runtime) {
@@ -24,6 +25,7 @@ function formatRuntime(runtime: number) {
 
 export default function Header() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const { user } = useAuth();
 
   const {
     searchQuery,
@@ -36,6 +38,11 @@ export default function Header() {
     clearSearch,
     closeDropdown,
   } = useMovieSearchDropdown();
+
+  const accountLabel =
+    [user?.name, user?.surname].filter(Boolean).join(" ") ||
+    user?.email ||
+    "Аккаунт";
 
   return (
     <>
@@ -158,13 +165,24 @@ export default function Header() {
               )}
             </div>
 
-            <button
-              type="button"
-              className="header__link"
-              onClick={() => setIsAuthModalOpen(true)}
-            >
-              Войти
-            </button>
+            {user ? (
+              <NavLink
+                to="/account"
+                className={({ isActive }) =>
+                  isActive ? "header__link header__link--active" : "header__link"
+                }
+              >
+                {accountLabel}
+              </NavLink>
+            ) : (
+              <button
+                type="button"
+                className="header__link"
+                onClick={() => setIsAuthModalOpen(true)}
+              >
+                Войти
+              </button>
+            )}
           </div>
         </div>
       </header>

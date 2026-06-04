@@ -32,6 +32,7 @@ export default function AuthModal({ onClose }: Props) {
     mode,
     loading,
     submitted,
+    error,
     values,
     setField,
     goLogin,
@@ -133,6 +134,12 @@ export default function AuthModal({ onClose }: Props) {
                 ? "Создание аккаунта..."
                 : "Создать аккаунт"}
           </button>
+
+          {error && (
+            <div className="auth-modal__error" role="alert">
+              {error}
+            </div>
+          )}
         </form>
 
         <div className="auth-modal__footer">

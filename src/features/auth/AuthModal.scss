@@ -164,6 +164,17 @@
     cursor: default;
 }
 
+.auth-modal__error {
+    margin-top: 4px;
+    padding: 10px 14px;
+    border-radius: $radius-md;
+    background: rgba($color-danger, 0.08);
+    color: $color-danger;
+    font-size: 14px;
+    line-height: 20px;
+    text-align: center;
+}
+
 .auth-modal__footer {
     margin-top: 0;
     display: flex;

@@ -17,6 +17,79 @@ export class ApiError extends Error {
     }
 }
 
+function extractErrorMessage(
+    body: unknown,
+    status: number,
+): string {
+    if (typeof body === "string" && body.trim()) {
+        return body.trim();
+    }
+
+    if (body && typeof body === "object") {
+        const obj = body as Record<string, unknown>;
+
+        for (const key of [
+            "message",
+            "error",
+            "errorMessage",
+            "detail",
+        ]) {
+            const value = obj[key];
+
+            if (typeof value === "string" && value.trim()) {
+                return value.trim();
+            }
+        }
+
+        const nestedErrors = obj.errors;
+
+        if (Array.isArray(nestedErrors) && nestedErrors.length > 0) {
+            const first = nestedErrors[0];
+
+            if (typeof first === "string" && first.trim()) {
+                return first.trim();
+            }
+
+            if (first && typeof first === "object") {
+                const firstObj = first as Record<string, unknown>;
+
+                for (const key of [
+                    "message",
+                    "error",
+                    "errorMessage",
+                    "detail",
+                ]) {
+                    const value = firstObj[key];
+
+                    if (typeof value === "string" && value.trim()) {
+                        return value.trim();
+                    }
+                }
+            }
+        }
+    }
+
+    switch (status) {
+        case 400:
+            return "Некорректные данные запроса";
+        case 401:
+            return "Неверный логин или пароль";
+        case 403:
+            return "Доступ запрещён";
+        case 404:
+            return "Ресурс не найден";
+        case 409:
+            return "Пользователь с такой почтой уже существует";
+        case 500:
+        case 502:
+        case 503:
+        case 504:
+            return "Сервер недоступен. Попробуйте позже";
+        default:
+            return "Ошибка запроса";
+    }
+}
+
 async function readJsonSafe(response: Response) {
     try {
         return await response.json();
@@ -53,15 +126,10 @@ async function requestJson<T>(
     if (!response.ok) {
         const responseBody = await readResponseBody(response);
 
-        const message =
-            typeof responseBody === "object" &&
-                responseBody &&
-                "message" in responseBody
-                ? String(
-                    (responseBody as { message?: unknown }).message ??
-                    "Ошибка запроса",
-                )
-                : "Ошибка запроса";
+        const message = extractErrorMessage(
+            responseBody,
+            response.status,
+        );
 
         throw new ApiError({
             message,
