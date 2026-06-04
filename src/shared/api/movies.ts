@@ -22,6 +22,18 @@ export async function getTopMovies() {
     return res.json();
 }
 
+export async function getMovieById(
+    id: string | number
+): Promise<Movie> {
+    const res = await fetch(`${BASE_URL}/movie/${id}`);
+
+    if (!res.ok) {
+        throw new Error("Ошибка загрузки фильма");
+    }
+
+    return res.json() as Promise<Movie>;
+}
+
 export async function getMoviesByGenre(
     genre: string
 ): Promise<Movie[]> {

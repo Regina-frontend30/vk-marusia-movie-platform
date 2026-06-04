@@ -4,6 +4,7 @@ import MainLayout from "./app/layouts/MainLayout";
 import HomePage from "./pages/home/HomePage";
 import MoviePage from "./pages/movie/MoviePage";
 import GenresPage from "./pages/genres/GenresPage";
+import AccountPage from "./pages/account/AccountPage";
 
 function App() {
   return (
@@ -16,6 +17,8 @@ function App() {
         <Route path="/genres" element={<GenresPage />} />
 
         <Route path="/genres/:genre" element={<GenresPage />} />
+
+        <Route path="/account" element={<AccountPage />} />
       </Routes>
     </MainLayout>
   );
