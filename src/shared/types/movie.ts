@@ -8,4 +8,6 @@ export type Movie = {
     runtime: number;
     posterUrl: string;
     backdropUrl: string;
+    trailerUrl?: string;
+    trailerYouTubeId?: string;
 };

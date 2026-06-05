@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Movie } from "../../shared/types/movie";
 import spriteUrl from "../../assets/sprite/sprite.svg";
+import TrailerModal from "../../shared/ui/trailer-modal/TrailerModal";
 import "./Hero.scss";
 
 type Props = {
@@ -10,6 +12,10 @@ type Props = {
 
 export default function Hero({ movie, onRefresh }: Props) {
   const navigate = useNavigate();
+  const [isTrailerOpen, setIsTrailerOpen] = useState(false);
+  const hasTrailer = Boolean(
+    movie.trailerYouTubeId || movie.trailerUrl
+  );
 
   function formatRuntime(minutes: number) {
     const h = Math.floor(minutes / 60);
@@ -43,7 +49,12 @@ export default function Hero({ movie, onRefresh }: Props) {
           {}
           <div className="hero__actions">
             {}
-            <button className="hero__button hero__button--primary">
+            <button
+              type="button"
+              className="hero__button hero__button--primary"
+              onClick={() => setIsTrailerOpen(true)}
+              disabled={!hasTrailer}
+            >
               Трейлер
             </button>
 
@@ -90,6 +101,15 @@ export default function Hero({ movie, onRefresh }: Props) {
           alt={movie.title}
         />
       </div>
+
+      {isTrailerOpen && hasTrailer ? (
+        <TrailerModal
+          title={movie.title}
+          trailerUrl={movie.trailerUrl}
+          trailerYouTubeId={movie.trailerYouTubeId}
+          onClose={() => setIsTrailerOpen(false)}
+        />
+      ) : null}
     </section>
   );
 }

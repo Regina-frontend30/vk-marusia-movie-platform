@@ -78,6 +78,11 @@
     color: white;
 }
 
+.hero__button:disabled {
+    opacity: 0.55;
+    cursor: default;
+}
+
 .hero__button--secondary {
     background: $color-surface-muted;
     color: white;

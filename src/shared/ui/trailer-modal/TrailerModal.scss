@@ -1,0 +1,68 @@
+@use "../../styles/global/variables" as *;
+
+.trailer-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 2100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.trailer-modal__overlay {
+  position: absolute;
+  inset: 0;
+  border: none;
+  background: rgba($color-black, 0.72);
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+}
+
+.trailer-modal__panel {
+  position: relative;
+  width: min(960px, 100%);
+  z-index: 1;
+}
+
+.trailer-modal__close {
+  position: absolute;
+  top: -52px;
+  right: 0;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: rgba($color-white, 0.14);
+  color: $color-text;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.trailer-modal__frame-wrap {
+  overflow: hidden;
+  border-radius: 20px;
+  box-shadow: 0 24px 80px rgba($color-black, 0.45);
+  background: rgba($color-black, 0.92);
+}
+
+.trailer-modal__frame {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  display: block;
+  border: 0;
+}
+
+@media (max-width: $vp-mobile) {
+  .trailer-modal {
+    padding: 16px;
+  }
+
+  .trailer-modal__close {
+    top: -44px;
+    width: 36px;
+    height: 36px;
+    font-size: 24px;
+  }
+}

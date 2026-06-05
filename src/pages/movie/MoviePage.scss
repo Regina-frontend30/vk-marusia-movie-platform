@@ -94,6 +94,11 @@
     background: $color-accent;
 }
 
+.movie-page__button:disabled {
+    opacity: 0.55;
+    cursor: default;
+}
+
 .movie-page__icon-btn {
     width: 68px;
     height: 56px;
