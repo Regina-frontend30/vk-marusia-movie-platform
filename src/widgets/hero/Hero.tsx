@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import type { Movie } from "../../shared/types/movie";
 import spriteUrl from "../../assets/sprite/sprite.svg";
 import TrailerModal from "../../shared/ui/trailer-modal/TrailerModal";
+import { useFavoriteToggle } from "../../hooks/useFavoriteToggle";
 import "./Hero.scss";
 
 type Props = {
@@ -13,6 +14,7 @@ type Props = {
 export default function Hero({ movie, onRefresh }: Props) {
   const navigate = useNavigate();
   const [isTrailerOpen, setIsTrailerOpen] = useState(false);
+  const favorite = useFavoriteToggle(movie.id);
   const hasTrailer = Boolean(
     movie.trailerYouTubeId || movie.trailerUrl
   );
@@ -71,11 +73,27 @@ export default function Hero({ movie, onRefresh }: Props) {
               {}
               <button
                 type="button"
-                className="hero__icon-btn"
-                aria-label="В избранное"
+                className={`hero__icon-btn ${
+                  favorite.isFavorite
+                    ? "hero__icon-btn--active"
+                    : ""
+                }`}
+                aria-label={
+                  favorite.isFavorite
+                    ? "Убрать из избранного"
+                    : "В избранное"
+                }
+                disabled={favorite.disabled}
+                onClick={favorite.toggleFavorite}
               >
                 <svg aria-hidden="true">
-                  <use href={`${spriteUrl}#icon-favorites`} />
+                  <use
+                    href={`${spriteUrl}#${
+                      favorite.isFavorite
+                        ? "icon-favorites-filled"
+                        : "icon-favorites"
+                    }`}
+                  />
                 </svg>
               </button>
 

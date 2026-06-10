@@ -1,4 +1,4 @@
-import MovieCard from "../../entities/movie/MovieCard";
+import { Link } from "react-router-dom";
 import spriteUrl from "../../assets/sprite/sprite.svg";
 import "./AccountPage.scss";
 import { useAccountPageController } from "../../hooks/useAccountPageController";
@@ -124,14 +124,37 @@ function AccountPage() {
         <div className="account__favorites">
           {user.favorites && user.favorites.length > 0 ? (
             <div className="account__movies">
-              {user.favorites.map((movie, index) => (
-                <MovieCard
+              {user.favorites.map((movie) => (
+                <div
                   key={movie.id}
-                  id={movie.id}
-                  title={movie.title}
-                  poster={movie.posterUrl}
-                  position={index + 1}
-                />
+                  className="account__movie-card"
+                >
+                  <Link
+                    to={`/movie/${movie.id}`}
+                    className="account__movie-link"
+                  >
+                    <img
+                      className="account__movie-image"
+                      src={movie.posterUrl}
+                      alt={movie.title}
+                    />
+                  </Link>
+
+                  <button
+                    type="button"
+                    className="account__movie-remove"
+                    aria-label="Удалить из избранного"
+                    disabled={
+                      accountController.removingFavoriteId ===
+                      movie.id
+                    }
+                    onClick={() =>
+                      accountController.removeFavorite(movie.id)
+                    }
+                  >
+                    ×
+                  </button>
+                </div>
               ))}
             </div>
           ) : (

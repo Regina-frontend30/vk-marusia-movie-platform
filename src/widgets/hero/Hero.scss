@@ -109,6 +109,15 @@
     cursor: pointer;
 }
 
+.hero__icon-btn--active {
+    color: $color-favorite;
+}
+
+.hero__icon-btn:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
 .hero__icon-btn svg {
     width: 20px;
     height: 20px;

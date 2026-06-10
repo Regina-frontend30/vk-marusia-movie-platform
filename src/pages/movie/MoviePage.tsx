@@ -4,6 +4,7 @@ import type { Movie } from "../../shared/types/movie";
 import "./MoviePage.scss";
 import spriteUrl from "../../assets/sprite/sprite.svg";
 import TrailerModal from "../../shared/ui/trailer-modal/TrailerModal";
+import { useFavoriteToggle } from "../../hooks/useFavoriteToggle";
 
 const BASE_URL = "https://cinemaguide.skillbox.cc";
 
@@ -11,9 +12,9 @@ export default function MoviePage() {
   const { id } = useParams<{ id: string }>();
 
   const [movie, setMovie] = useState<Movie | null>(null);
-  const [isFavorite, setIsFavorite] = useState(false);
   const [isTrailerOpen, setIsTrailerOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const favorite = useFavoriteToggle(movie?.id ?? null);
 
   useEffect(() => {
     const loadMovie = async () => {
@@ -72,14 +73,19 @@ export default function MoviePage() {
               <button
                 type="button"
                 className={`movie-page__icon-btn ${
-                  isFavorite ? "movie-page__icon-btn--active" : ""
+                  favorite.isFavorite
+                    ? "movie-page__icon-btn--active"
+                    : ""
                 }`}
-                onClick={() => setIsFavorite(!isFavorite)}
+                disabled={favorite.disabled}
+                onClick={favorite.toggleFavorite}
               >
                 <svg className="movie-page__icon">
                   <use
                     href={`${spriteUrl}#${
-                      isFavorite ? "icon-favorites-filled" : "icon-favorites"
+                      favorite.isFavorite
+                        ? "icon-favorites-filled"
+                        : "icon-favorites"
                     }`}
                   />
                 </svg>

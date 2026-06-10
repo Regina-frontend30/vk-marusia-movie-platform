@@ -172,6 +172,59 @@
         justify-content: start;
     }
 
+    &__movie-card {
+        position: relative;
+        width: 224px;
+    }
+
+    &__movie-link {
+        display: block;
+    }
+
+    &__movie-image {
+        width: 100%;
+        height: 336px;
+        display: block;
+        object-fit: cover;
+        border-radius: 16px;
+        box-shadow: 0 0 0 1px $color-border-20;
+    }
+
+    &__movie-remove {
+        position: absolute;
+        top: -16px;
+        right: -16px;
+        width: 40px;
+        height: 40px;
+        border: none;
+        border-radius: 50%;
+        background: $color-white;
+        color: $color-text-dark;
+        font-size: 28px;
+        line-height: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity $transition-200;
+        z-index: 1;
+        box-shadow: 0 12px 24px rgba($color-black, 0.2);
+    }
+
+    &__movie-card:hover &__movie-remove,
+    &__movie-card:focus-within &__movie-remove {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    &__movie-remove:disabled {
+        opacity: 1;
+        pointer-events: auto;
+        cursor: default;
+    }
+
     &__empty {
         color: $color-text-muted;
         font-size: 18px;
@@ -287,12 +340,22 @@
         display: none;
     }
 
-    .account__movies .movie-card {
+    .account__movie-card {
         flex: 0 0 224px;
         scroll-snap-align: start;
     }
 
-    .account__movies .movie-card__image {
+    .account__movie-image {
         height: 336px;
+    }
+
+    .account__movie-remove {
+        opacity: 1;
+        pointer-events: auto;
+        top: 8px;
+        right: 8px;
+        width: 36px;
+        height: 36px;
+        font-size: 24px;
     }
 }

@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "../app/providers/useAuth";
 import { logout as logoutRequest } from "../shared/api/auth";
+import { removeFavorite } from "../shared/api/favorites";
 import { getMovieById } from "../shared/api/movies";
 import type { Movie } from "../shared/types/movie";
 
@@ -57,7 +58,8 @@ function normalizeFavoriteIds(
 
 export function useAccountPageController() {
   const navigate = useNavigate();
-  const { loading, user, setUser } = useAuth();
+  const { loading, user, setUser, refreshUser } =
+    useAuth();
 
   const [activeTab, setActiveTab] = useState<
     "favorites" | "settings"
@@ -67,6 +69,8 @@ export function useAccountPageController() {
   >([]);
   const [favoritesLoading, setFavoritesLoading] =
     useState(false);
+  const [removingFavoriteId, setRemovingFavoriteId] =
+    useState<number | null>(null);
 
   useEffect(() => {
     async function loadFavoriteMovies() {
@@ -141,6 +145,21 @@ export function useAccountPageController() {
     }
   }
 
+  async function handleRemoveFavorite(movieId: number) {
+    try {
+      setRemovingFavoriteId(movieId);
+      await removeFavorite(movieId);
+      setFavoriteMovies((prev) =>
+        prev.filter((movie) => movie.id !== movieId)
+      );
+      await refreshUser();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setRemovingFavoriteId(null);
+    }
+  }
+
   return {
     loading: loading || favoritesLoading,
     user: accountUser,
@@ -148,6 +167,7 @@ export function useAccountPageController() {
     setActiveTab,
     displayName,
     logout: handleLogout,
-    removeFavorite: () => {},
+    removeFavorite: handleRemoveFavorite,
+    removingFavoriteId,
   };
 }
