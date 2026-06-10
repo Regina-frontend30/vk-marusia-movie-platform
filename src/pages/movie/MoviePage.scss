@@ -124,13 +124,13 @@
 }
 
 .movie-page__icon-btn:disabled {
-    opacity: 0.45;
+    opacity: 1;
     cursor: default;
 }
 
 .movie-page__icon {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     display: block;
     color: currentColor;
 }

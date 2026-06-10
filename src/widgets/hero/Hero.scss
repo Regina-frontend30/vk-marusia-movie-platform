@@ -8,13 +8,16 @@
     display: grid;
     grid-template-columns: minmax(0, 520px) minmax(0, 680px);
     gap: 80px;
-    align-items: start;
+    align-items: center;
+    min-height: 552px;
 }
 
 .hero__info {
     display: flex;
     flex-direction: column;
-    padding: 80px 0 120px;
+    justify-content: center;
+    min-height: 552px;
+    padding: 40px 0;
 }
 
 /* META */
@@ -47,6 +50,12 @@
     font-size: 42px;
     font-weight: 700;
     margin-bottom: 16px;
+    min-height: 100px;
+    display: -webkit-box;
+    overflow: hidden;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
 }
 
 .hero__description {
@@ -54,6 +63,12 @@
     color: $color-text-muted;
     margin-bottom: 40px;
     max-width: 500px;
+    min-height: 78px;
+    display: -webkit-box;
+    overflow: hidden;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
 }
 
 /* ACTIONS */
@@ -96,11 +111,11 @@
 }
 
 .hero__icon-btn {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
+    width: 68px;
+    height: 56px;
+    border-radius: 28px;
     background: $color-surface-alt;
-    border: 1px solid $color-black-40;
+    border: none;
     padding: 0;
     color: $color-text;
     display: flex;
@@ -114,13 +129,13 @@
 }
 
 .hero__icon-btn:disabled {
-    opacity: 0.45;
+    opacity: 1;
     cursor: default;
 }
 
 .hero__icon-btn svg {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     display: block;
     color: currentColor;
     fill: currentColor;
@@ -129,8 +144,11 @@
 /* IMAGE */
 
 .hero__image {
-    width: 100%;
-    max-width: 680px;
+    width: 680px;
+    max-width: 100%;
+    height: 552px;
+    aspect-ratio: 680 / 552;
     border-radius: 16px;
     object-fit: cover;
+    justify-self: end;
 }
