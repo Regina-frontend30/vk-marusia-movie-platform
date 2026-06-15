@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import type { Movie } from "../../shared/types/movie";
 import "./MoviePage.scss";
 import spriteUrl from "../../assets/sprite/sprite.svg";
+import AuthModal from "../../features/auth/AuthModal";
 import TrailerModal from "../../shared/ui/trailer-modal/TrailerModal";
 import { useFavoriteToggle } from "../../hooks/useFavoriteToggle";
 
@@ -129,6 +130,10 @@ export default function MoviePage() {
           trailerYouTubeId={movie.trailerYouTubeId}
           onClose={() => setIsTrailerOpen(false)}
         />
+      ) : null}
+
+      {favorite.isAuthOpen ? (
+        <AuthModal onClose={favorite.closeAuth} />
       ) : null}
     </>
   );

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Movie } from "../../shared/types/movie";
 import spriteUrl from "../../assets/sprite/sprite.svg";
+import AuthModal from "../../features/auth/AuthModal";
 import TrailerModal from "../../shared/ui/trailer-modal/TrailerModal";
 import { useFavoriteToggle } from "../../hooks/useFavoriteToggle";
 import "./Hero.scss";
@@ -127,6 +128,10 @@ export default function Hero({ movie, onRefresh }: Props) {
           trailerYouTubeId={movie.trailerYouTubeId}
           onClose={() => setIsTrailerOpen(false)}
         />
+      ) : null}
+
+      {favorite.isAuthOpen ? (
+        <AuthModal onClose={favorite.closeAuth} />
       ) : null}
     </section>
   );

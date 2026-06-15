@@ -49,6 +49,7 @@ export function useFavoriteToggle(
 ) {
   const { user, refreshUser } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
 
   const favoriteIds = useMemo(
     () => normalizeFavoriteIds(user?.favorites),
@@ -61,7 +62,12 @@ export function useFavoriteToggle(
   );
 
   async function toggleFavorite() {
-    if (!user || movieId === null || loading) {
+    if (!user) {
+      setIsAuthOpen(true);
+      return;
+    }
+
+    if (movieId === null || loading) {
       return;
     }
 
@@ -85,9 +91,11 @@ export function useFavoriteToggle(
   return {
     isFavorite,
     isAuthorized: Boolean(user),
+    isAuthOpen,
     loading,
     disabled:
-      !user || movieId === null || loading,
+      movieId === null || loading,
+    closeAuth: () => setIsAuthOpen(false),
     toggleFavorite,
   };
 }
