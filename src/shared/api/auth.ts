@@ -189,12 +189,12 @@ export type Profile = {
 export async function getProfile(): Promise<Profile | null> {
     try {
         return await requestJson<Profile>("/profile");
-    } catch (e) {
-        if (e instanceof ApiError && e.status === 401) {
+    } catch (error) {
+        if (error instanceof ApiError && error.status === 401) {
             return null;
         }
 
-        throw e;
+        throw error;
     }
 }
 

@@ -28,7 +28,7 @@ export default function Header() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] =
     useState(false);
-  const { user } = useAuth();
+  const { user: currentUser } = useAuth();
 
   const {
     searchQuery,
@@ -42,9 +42,9 @@ export default function Header() {
     closeDropdown,
   } = useMovieSearchDropdown();
 
-  const accountLabel =
-    [user?.name, user?.surname].filter(Boolean).join(" ") ||
-    user?.email ||
+  const accountDisplayName =
+    [currentUser?.name, currentUser?.surname].filter(Boolean).join(" ") ||
+    currentUser?.email ||
     "Аккаунт";
 
   function openAuthModal() {
@@ -112,7 +112,7 @@ export default function Header() {
                 className="header__search"
                 placeholder="Поиск"
                 value={searchQuery}
-                onChange={(e) => onChangeSearch(e.target.value)}
+                onChange={(event) => onChangeSearch(event.target.value)}
                 onFocus={onFocusSearch}
               />
 
@@ -189,7 +189,7 @@ export default function Header() {
           </div>
 
           <div className="header__right">
-            {user ? (
+            {currentUser ? (
               <>
                 <NavLink
                   to="/account"
@@ -199,7 +199,7 @@ export default function Header() {
                       : "header__link"
                   }
                 >
-                  {accountLabel}
+                  {accountDisplayName}
                 </NavLink>
 
                 <NavLink

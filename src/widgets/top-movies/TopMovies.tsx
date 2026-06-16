@@ -11,9 +11,9 @@ export default function TopMovies({ movies }: Props) {
 
   return (
     <section className="top-movies container">
-      <h2 className="home__title">Топ-10 фильмов</h2>
+      <h2 className="top-movies__title">Топ-10 фильмов</h2>
 
-      <div className="home__list">
+      <div className="top-movies__list">
         {movies.map((movie, index) => (
           <div
             key={movie.id}

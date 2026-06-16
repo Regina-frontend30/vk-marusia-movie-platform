@@ -35,7 +35,7 @@ export function useAuthModal({
     const [error, setError] =
         useState<string | null>(null);
 
-    const [values, setValues] = useState({
+    const [formValues, setFormValues] = useState({
         email: "",
         password: "",
         firstName: "",
@@ -43,11 +43,11 @@ export function useAuthModal({
         passwordConfirm: "",
     });
 
-    function setField(
+    function setFormField(
         field: string,
         value: string,
     ) {
-        setValues((prev) => ({
+        setFormValues((prev) => ({
             ...prev,
             [field]: value,
         }));
@@ -70,8 +70,8 @@ export function useAuthModal({
         setError(null);
 
         if (
-            !values.email.trim() ||
-            !values.password.trim()
+            !formValues.email.trim() ||
+            !formValues.password.trim()
         ) {
             return;
         }
@@ -81,8 +81,8 @@ export function useAuthModal({
         try {
             if (mode === "login") {
                 await login(
-                    values.email,
-                    values.password,
+                    formValues.email,
+                    formValues.password,
                 );
 
                 await refreshUser();
@@ -95,27 +95,27 @@ export function useAuthModal({
 
             if (mode === "register") {
                 if (
-                    !values.firstName.trim() ||
-                    !values.lastName.trim() ||
-                    !values.passwordConfirm.trim()
+                    !formValues.firstName.trim() ||
+                    !formValues.lastName.trim() ||
+                    !formValues.passwordConfirm.trim()
                 ) {
                     setError("Заполните все поля регистрации");
                     return;
                 }
 
                 if (
-                    values.password !==
-                    values.passwordConfirm
+                    formValues.password !==
+                    formValues.passwordConfirm
                 ) {
                     setError("Пароли не совпадают");
                     return;
                 }
 
                 await register({
-                    email: values.email,
-                    password: values.password,
-                    firstName: values.firstName,
-                    lastName: values.lastName,
+                    email: formValues.email,
+                    password: formValues.password,
+                    firstName: formValues.firstName,
+                    lastName: formValues.lastName,
                 });
 
                 setMode("success");
@@ -141,8 +141,8 @@ export function useAuthModal({
         loading,
         submitted,
         error,
-        values,
-        setField,
+        formValues,
+        setFormField,
         goLogin,
         goRegister,
         onSubmit,

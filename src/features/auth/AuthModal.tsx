@@ -33,8 +33,8 @@ export default function AuthModal({ onClose }: Props) {
     loading,
     submitted,
     error,
-    values,
-    setField,
+    formValues,
+    setFormField,
     goLogin,
     goRegister,
     onSubmit,
@@ -63,60 +63,68 @@ export default function AuthModal({ onClose }: Props) {
         )}
 
         <form onSubmit={onSubmit} className="auth-modal__form" noValidate>
-          <FieldWrapper hasError={submitted && !values.email.trim()}>
+          <FieldWrapper hasError={submitted && !formValues.email.trim()}>
             <input
               className="auth-modal__input"
               type="email"
               placeholder="Электронная почта"
-              value={values.email}
-              onChange={(e) => setField("email", e.target.value)}
+              value={formValues.email}
+              onChange={(event) => setFormField("email", event.target.value)}
             />
           </FieldWrapper>
 
           {mode === "register" && (
             <>
-              <FieldWrapper hasError={submitted && !values.firstName.trim()}>
+              <FieldWrapper hasError={submitted && !formValues.firstName.trim()}>
                 <input
                   className="auth-modal__input"
                   type="text"
                   placeholder="Имя"
-                  value={values.firstName}
-                  onChange={(e) => setField("firstName", e.target.value)}
+                  value={formValues.firstName}
+                  onChange={(event) =>
+                    setFormField("firstName", event.target.value)
+                  }
                 />
               </FieldWrapper>
 
-              <FieldWrapper hasError={submitted && !values.lastName.trim()}>
+              <FieldWrapper hasError={submitted && !formValues.lastName.trim()}>
                 <input
                   className="auth-modal__input"
                   type="text"
                   placeholder="Фамилия"
-                  value={values.lastName}
-                  onChange={(e) => setField("lastName", e.target.value)}
+                  value={formValues.lastName}
+                  onChange={(event) =>
+                    setFormField("lastName", event.target.value)
+                  }
                 />
               </FieldWrapper>
             </>
           )}
 
-          <FieldWrapper hasError={submitted && !values.password.trim()}>
+          <FieldWrapper hasError={submitted && !formValues.password.trim()}>
             <input
               className="auth-modal__input"
               type="password"
               placeholder="Пароль"
-              value={values.password}
-              onChange={(e) => setField("password", e.target.value)}
+              value={formValues.password}
+              onChange={(event) =>
+                setFormField("password", event.target.value)
+              }
             />
           </FieldWrapper>
 
           {mode === "register" && (
             <FieldWrapper
-              hasError={submitted && !values.passwordConfirm.trim()}
+              hasError={submitted && !formValues.passwordConfirm.trim()}
             >
               <input
                 className="auth-modal__input"
                 type="password"
                 placeholder="Подтвердите пароль"
-                value={values.passwordConfirm}
-                onChange={(e) => setField("passwordConfirm", e.target.value)}
+                value={formValues.passwordConfirm}
+                onChange={(event) =>
+                  setFormField("passwordConfirm", event.target.value)
+                }
               />
             </FieldWrapper>
           )}

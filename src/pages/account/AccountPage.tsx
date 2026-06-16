@@ -4,24 +4,24 @@ import "./AccountPage.scss";
 import { useAccountPageController } from "../../hooks/useAccountPageController";
 
 function AccountPage() {
-  const accountController = useAccountPageController();
+  const accountPageController = useAccountPageController();
 
-  if (accountController.loading) {
+  if (accountPageController.loading) {
     return <div className="container">Loading...</div>;
   }
 
-  if (!accountController.user) {
+  if (!accountPageController.user) {
     return <div className="container">Не авторизован</div>;
   }
 
-  const user = accountController.user;
+  const currentUser = accountPageController.user;
 
-  const initialsRaw =
-    `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`.trim();
+  const userInitialsRaw =
+    `${currentUser.firstName?.[0] ?? ""}${currentUser.lastName?.[0] ?? ""}`.trim();
 
-  const initials = initialsRaw
-    ? initialsRaw.toUpperCase()
-    : user.email
+  const userInitials = userInitialsRaw
+    ? userInitialsRaw.toUpperCase()
+    : currentUser.email
         .replace(/[^a-zA-Zа-яА-Я]/g, "")
         .slice(0, 2)
         .toUpperCase();
@@ -33,11 +33,11 @@ function AccountPage() {
       <div className="account__tabs">
         <button
           className={`account__tab ${
-            accountController.activeTab === "favorites"
+            accountPageController.activeTab === "favorites"
               ? "account__tab--active"
               : ""
           }`}
-          onClick={() => accountController.setActiveTab("favorites")}
+          onClick={() => accountPageController.setActiveTab("favorites")}
         >
           <svg className="account__tab-icon" aria-hidden="true">
             <use href={`${spriteUrl}#icon-favorites`} />
@@ -54,11 +54,11 @@ function AccountPage() {
 
         <button
           className={`account__tab ${
-            accountController.activeTab === "settings"
+            accountPageController.activeTab === "settings"
               ? "account__tab--active"
               : ""
           }`}
-          onClick={() => accountController.setActiveTab("settings")}
+          onClick={() => accountPageController.setActiveTab("settings")}
         >
           <svg className="account__tab-icon" aria-hidden="true">
             <use href={`${spriteUrl}#icon-name`} />
@@ -74,7 +74,7 @@ function AccountPage() {
         </button>
       </div>
 
-      {accountController.activeTab === "settings" && (
+      {accountPageController.activeTab === "settings" && (
         <div className="account__settings">
           <div className="account__user">
             <div className="account__info">
@@ -83,14 +83,14 @@ function AccountPage() {
                   className="account__row-icon account__row-icon--avatar"
                   aria-hidden="true"
                 >
-                  {initials}
+                  {userInitials}
                 </div>
 
                 <div className="account__row-content">
                   <div className="account__label">Имя Фамилия</div>
 
                   <div className="account__value">
-                    {accountController.displayName}
+                    {accountPageController.displayName}
                   </div>
                 </div>
               </div>
@@ -105,7 +105,7 @@ function AccountPage() {
                 <div className="account__row-content">
                   <div className="account__label">Электронная почта</div>
 
-                  <div className="account__value">{user.email}</div>
+                  <div className="account__value">{currentUser.email}</div>
                 </div>
               </div>
             </div>
@@ -113,30 +113,30 @@ function AccountPage() {
 
           <button
             className="account__logout"
-            onClick={accountController.logout}
+            onClick={accountPageController.logout}
           >
             Выйти из аккаунта
           </button>
         </div>
       )}
 
-      {accountController.activeTab === "favorites" && (
+      {accountPageController.activeTab === "favorites" && (
         <div className="account__favorites">
-          {user.favorites && user.favorites.length > 0 ? (
+          {currentUser.favorites && currentUser.favorites.length > 0 ? (
             <div className="account__movies">
-              {user.favorites.map((movie) => (
+              {currentUser.favorites.map((favoriteMovie) => (
                 <div
-                  key={movie.id}
+                  key={favoriteMovie.id}
                   className="account__movie-card"
                 >
                   <Link
-                    to={`/movie/${movie.id}`}
+                    to={`/movie/${favoriteMovie.id}`}
                     className="account__movie-link"
                   >
                     <img
                       className="account__movie-image"
-                      src={movie.posterUrl}
-                      alt={movie.title}
+                      src={favoriteMovie.posterUrl}
+                      alt={favoriteMovie.title}
                     />
                   </Link>
 
@@ -145,11 +145,11 @@ function AccountPage() {
                     className="account__movie-remove"
                     aria-label="Удалить из избранного"
                     disabled={
-                      accountController.removingFavoriteId ===
-                      movie.id
+                      accountPageController.removingFavoriteId ===
+                      favoriteMovie.id
                     }
                     onClick={() =>
-                      accountController.removeFavorite(movie.id)
+                      accountPageController.removeFavorite(favoriteMovie.id)
                     }
                   >
                     ×

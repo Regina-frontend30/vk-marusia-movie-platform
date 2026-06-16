@@ -15,21 +15,20 @@ type Props = {
 export default function Hero({ movie, onRefresh }: Props) {
   const navigate = useNavigate();
   const [isTrailerOpen, setIsTrailerOpen] = useState(false);
-  const favorite = useFavoriteToggle(movie.id);
+  const favoriteController = useFavoriteToggle(movie.id);
   const hasTrailer = Boolean(
     movie.trailerYouTubeId || movie.trailerUrl
   );
 
   function formatRuntime(minutes: number) {
-    const h = Math.floor(minutes / 60);
-    const m = minutes % 60;
-    return `${h ? h + " ч " : ""}${m} мин`;
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    return `${hours ? hours + " ч " : ""}${remainingMinutes} мин`;
   }
 
   return (
     <section className="hero">
       <div className="hero__content container">
-        {/* LEFT */}
         <div className="hero__info">
           <div className="hero__meta">
             <span className="hero__rating">
@@ -49,9 +48,7 @@ export default function Hero({ movie, onRefresh }: Props) {
 
           <p className="hero__description">{movie.plot}</p>
 
-          {}
           <div className="hero__actions">
-            {}
             <button
               type="button"
               className="hero__button hero__button--primary"
@@ -61,36 +58,34 @@ export default function Hero({ movie, onRefresh }: Props) {
               Трейлер
             </button>
 
-            {}
             <button
+              type="button"
               className="hero__button hero__button--secondary"
               onClick={() => navigate(`/movie/${movie.id}`)}
             >
               О фильме
             </button>
 
-            {}
             <div className="hero__icons">
-              {}
               <button
                 type="button"
                 className={`hero__icon-btn ${
-                  favorite.isFavorite
+                  favoriteController.isFavorite
                     ? "hero__icon-btn--active"
                     : ""
                 }`}
                 aria-label={
-                  favorite.isFavorite
+                  favoriteController.isFavorite
                     ? "Убрать из избранного"
                     : "В избранное"
                 }
-                disabled={favorite.disabled}
-                onClick={favorite.toggleFavorite}
+                disabled={favoriteController.disabled}
+                onClick={favoriteController.toggleFavorite}
               >
                 <svg aria-hidden="true">
                   <use
                     href={`${spriteUrl}#${
-                      favorite.isFavorite
+                      favoriteController.isFavorite
                         ? "icon-favorites-filled"
                         : "icon-favorites"
                     }`}
@@ -98,7 +93,6 @@ export default function Hero({ movie, onRefresh }: Props) {
                 </svg>
               </button>
 
-              {}
               <button
                 type="button"
                 className="hero__icon-btn"
@@ -113,7 +107,6 @@ export default function Hero({ movie, onRefresh }: Props) {
           </div>
         </div>
 
-        {}
         <img
           className="hero__image"
           src={movie.backdropUrl}
@@ -130,8 +123,8 @@ export default function Hero({ movie, onRefresh }: Props) {
         />
       ) : null}
 
-      {favorite.isAuthOpen ? (
-        <AuthModal onClose={favorite.closeAuth} />
+      {favoriteController.isAuthOpen ? (
+        <AuthModal onClose={favoriteController.closeAuth} />
       ) : null}
     </section>
   );

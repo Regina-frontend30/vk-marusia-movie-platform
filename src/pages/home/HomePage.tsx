@@ -5,39 +5,39 @@ import { getRandomMovie, getTopMovies } from "../../shared/api/movies";
 import type { Movie } from "../../shared/types/movie";
 
 export default function HomePage() {
-  const [movie, setMovie] = useState<Movie | null>(null);
+  const [featuredMovie, setFeaturedMovie] = useState<Movie | null>(null);
   const [topMovies, setTopMovies] = useState<Movie[]>([]);
 
-  const loadRandom = async () => {
+  const loadRandomMovie = async () => {
     try {
-      const data = await getRandomMovie();
-      setMovie(data);
-    } catch (e) {
-      console.error(e);
+      const randomMovie = await getRandomMovie();
+      setFeaturedMovie(randomMovie);
+    } catch (error) {
+      console.error(error);
     }
   };
 
-  const loadTop = async () => {
+  const loadTopMovies = async () => {
     try {
-      const data = await getTopMovies();
-      setTopMovies(data);
-    } catch (e) {
-      console.error(e);
+      const topMoviesList = await getTopMovies();
+      setTopMovies(topMoviesList);
+    } catch (error) {
+      console.error(error);
     }
   };
 
   useEffect(() => {
     queueMicrotask(() => {
-      void loadRandom();
-      void loadTop();
+      void loadRandomMovie();
+      void loadTopMovies();
     });
   }, []);
 
-  if (!movie) return <div>Загрузка...</div>;
+  if (!featuredMovie) return <div>Загрузка...</div>;
 
   return (
     <>
-      <Hero movie={movie} onRefresh={loadRandom} />
+      <Hero movie={featuredMovie} onRefresh={loadRandomMovie} />
       <TopMovies movies={topMovies} />
     </>
   );

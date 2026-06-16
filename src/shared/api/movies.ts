@@ -3,63 +3,63 @@ import type { Movie } from "../types/movie";
 const BASE_URL = "https://cinemaguide.skillbox.cc";
 
 export async function getRandomMovie() {
-    const res = await fetch(`${BASE_URL}/movie/random`);
+    const response = await fetch(`${BASE_URL}/movie/random`);
 
-    if (!res.ok) {
+    if (!response.ok) {
         throw new Error("Ошибка загрузки фильма");
     }
 
-    return res.json();
+    return response.json();
 }
 
 export async function getTopMovies() {
-    const res = await fetch(`${BASE_URL}/movie/top10`);
+    const response = await fetch(`${BASE_URL}/movie/top10`);
 
-    if (!res.ok) {
+    if (!response.ok) {
         throw new Error("Ошибка загрузки топа");
     }
 
-    return res.json();
+    return response.json();
 }
 
 export async function getMovieById(
     id: string | number
 ): Promise<Movie> {
-    const res = await fetch(`${BASE_URL}/movie/${id}`);
+    const response = await fetch(`${BASE_URL}/movie/${id}`);
 
-    if (!res.ok) {
+    if (!response.ok) {
         throw new Error("Ошибка загрузки фильма");
     }
 
-    return res.json() as Promise<Movie>;
+    return response.json() as Promise<Movie>;
 }
 
 export async function getMoviesByGenre(
     genre: string
 ): Promise<Movie[]> {
-    const res = await fetch(
+    const response = await fetch(
         `${BASE_URL}/movie?genre=${encodeURIComponent(genre)}`
     );
 
-    if (!res.ok) {
+    if (!response.ok) {
         throw new Error("Ошибка загрузки фильмов");
     }
 
-    return res.json() as Promise<Movie[]>;
+    return response.json() as Promise<Movie[]>;
 }
 
 export async function searchMovies(
     query: string,
     signal?: AbortSignal
 ): Promise<Movie[]> {
-    const res = await fetch(
+    const response = await fetch(
         `${BASE_URL}/movie?title=${encodeURIComponent(query)}`,
         { signal }
     );
 
-    if (!res.ok) {
+    if (!response.ok) {
         throw new Error("Ошибка поиска");
     }
 
-    return res.json() as Promise<Movie[]>;
+    return response.json() as Promise<Movie[]>;
 }

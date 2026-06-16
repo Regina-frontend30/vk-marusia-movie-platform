@@ -12,37 +12,37 @@ const BASE_URL = "https://cinemaguide.skillbox.cc";
 export default function MoviePage() {
   const { id } = useParams<{ id: string }>();
 
-  const [movie, setMovie] = useState<Movie | null>(null);
+  const [movieDetails, setMovieDetails] = useState<Movie | null>(null);
   const [isTrailerOpen, setIsTrailerOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  const favorite = useFavoriteToggle(movie?.id ?? null);
+  const favoriteController = useFavoriteToggle(movieDetails?.id ?? null);
 
   useEffect(() => {
-    const loadMovie = async () => {
+    const loadMovieDetails = async () => {
       try {
-        const res = await fetch(`${BASE_URL}/movie/${id}`);
-        const data = await res.json();
-        setMovie(data);
-      } catch (e) {
-        console.error(e);
+        const response = await fetch(`${BASE_URL}/movie/${id}`);
+        const movieData = await response.json();
+        setMovieDetails(movieData);
+      } catch (error) {
+        console.error(error);
       } finally {
         setLoading(false);
       }
     };
 
-    loadMovie();
+    loadMovieDetails();
   }, [id]);
 
   if (loading) {
     return <div className="container">Загрузка...</div>;
   }
 
-  if (!movie) {
+  if (!movieDetails) {
     return <div className="container">Фильм не найден</div>;
   }
 
   const hasTrailer = Boolean(
-    movie.trailerYouTubeId || movie.trailerUrl
+    movieDetails.trailerYouTubeId || movieDetails.trailerUrl
   );
 
   return (
@@ -51,15 +51,15 @@ export default function MoviePage() {
         <div className="movie-page__hero">
           <div className="movie-page__info">
             <div className="movie-page__meta">
-              <span className="movie-page__rating">★ {movie.tmdbRating}</span>
-              <span className="movie-page__year">{movie.releaseYear}</span>
-              <span className="movie-page__genres">{movie.genres?.[0]}</span>
-              <span className="movie-page__runtime">{movie.runtime} мин</span>
+              <span className="movie-page__rating">★ {movieDetails.tmdbRating}</span>
+              <span className="movie-page__year">{movieDetails.releaseYear}</span>
+              <span className="movie-page__genres">{movieDetails.genres?.[0]}</span>
+              <span className="movie-page__runtime">{movieDetails.runtime} мин</span>
             </div>
 
-            <h1 className="movie-page__title">{movie.title}</h1>
+            <h1 className="movie-page__title">{movieDetails.title}</h1>
 
-            <p className="movie-page__plot">{movie.plot}</p>
+            <p className="movie-page__plot">{movieDetails.plot}</p>
 
             <div className="movie-page__actions">
               <button
@@ -74,17 +74,17 @@ export default function MoviePage() {
               <button
                 type="button"
                 className={`movie-page__icon-btn ${
-                  favorite.isFavorite
+                  favoriteController.isFavorite
                     ? "movie-page__icon-btn--active"
                     : ""
                 }`}
-                disabled={favorite.disabled}
-                onClick={favorite.toggleFavorite}
+                disabled={favoriteController.disabled}
+                onClick={favoriteController.toggleFavorite}
               >
                 <svg className="movie-page__icon">
                   <use
                     href={`${spriteUrl}#${
-                      favorite.isFavorite
+                      favoriteController.isFavorite
                         ? "icon-favorites-filled"
                         : "icon-favorites"
                     }`}
@@ -96,8 +96,8 @@ export default function MoviePage() {
 
           <img
             className="movie-page__image"
-            src={movie.backdropUrl}
-            alt={movie.title}
+            src={movieDetails.backdropUrl}
+            alt={movieDetails.title}
           />
         </div>
 
@@ -107,17 +107,17 @@ export default function MoviePage() {
           <div className="movie-page__about-rows">
             <div className="movie-page__about-row">
               <span>Год</span>
-              <span>{movie.releaseYear}</span>
+              <span>{movieDetails.releaseYear}</span>
             </div>
 
             <div className="movie-page__about-row">
               <span>Жанр</span>
-              <span>{movie.genres?.join(", ")}</span>
+              <span>{movieDetails.genres?.join(", ")}</span>
             </div>
 
             <div className="movie-page__about-row">
               <span>Длительность</span>
-              <span>{movie.runtime} мин</span>
+              <span>{movieDetails.runtime} мин</span>
             </div>
           </div>
         </div>
@@ -125,15 +125,15 @@ export default function MoviePage() {
 
       {isTrailerOpen && hasTrailer ? (
         <TrailerModal
-          title={movie.title}
-          trailerUrl={movie.trailerUrl}
-          trailerYouTubeId={movie.trailerYouTubeId}
+          title={movieDetails.title}
+          trailerUrl={movieDetails.trailerUrl}
+          trailerYouTubeId={movieDetails.trailerYouTubeId}
           onClose={() => setIsTrailerOpen(false)}
         />
       ) : null}
 
-      {favorite.isAuthOpen ? (
-        <AuthModal onClose={favorite.closeAuth} />
+      {favoriteController.isAuthOpen ? (
+        <AuthModal onClose={favoriteController.closeAuth} />
       ) : null}
     </>
   );
