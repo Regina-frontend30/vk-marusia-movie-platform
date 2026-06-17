@@ -2,21 +2,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { searchMovies } from "../shared/api/movies";
 import type { Movie } from "../shared/types/movie";
 
-
-
-export function useMovieSearchDropdown() {
-    const [searchQuery, setSearchQuery] = useState("");
-    const [searchOpen, setSearchOpen] = useState(false);
-    const [searchLoading, setSearchLoading] = useState(false);
+function useSearchResults(
+    trimmedQuery: string,
+    setSearchLoading: React.Dispatch<React.SetStateAction<boolean>>
+) {
     const [searchResults, setSearchResults] = useState<Movie[]>([]);
-
-    const searchWrapRef = useRef<HTMLDivElement | null>(null);
-
-    const trimmedQuery = searchQuery.trim();
-
-    const visibleResults = useMemo(() => {
-        return searchResults.slice(0, 5);
-    }, [searchResults]);
 
     useEffect(() => {
         if (!trimmedQuery) {
@@ -49,8 +39,15 @@ export function useMovieSearchDropdown() {
             controller.abort();
             window.clearTimeout(timeoutId);
         };
-    }, [trimmedQuery]);
+    }, [setSearchLoading, trimmedQuery]);
 
+    return { searchResults, setSearchResults };
+}
+
+function useCloseOnOutsideClick(
+    searchWrapRef: React.RefObject<HTMLDivElement | null>,
+    setSearchOpen: React.Dispatch<React.SetStateAction<boolean>>
+) {
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
             const node = searchWrapRef.current;
@@ -70,47 +67,62 @@ export function useMovieSearchDropdown() {
                 handleClickOutside
             );
         };
-    }, []);
+    }, [searchWrapRef, setSearchOpen]);
+}
 
+function useSearchControls(args: {
+    searchQuery: string;
+    setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
+    setSearchResults: React.Dispatch<React.SetStateAction<Movie[]>>;
+    setSearchOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    setSearchLoading: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
     function onChangeSearch(value: string) {
-        setSearchQuery(value);
+        args.setSearchQuery(value);
 
         if (!value.trim()) {
-            setSearchResults([]);
-            setSearchOpen(false);
-            setSearchLoading(false);
+            args.setSearchResults([]);
+            args.setSearchOpen(false);
+            args.setSearchLoading(false);
             return;
         }
 
-        setSearchLoading(true);
-        setSearchOpen(true);
+        args.setSearchLoading(true);
+        args.setSearchOpen(true);
     }
 
     function onFocusSearch() {
-        if (searchQuery.trim()) {
-            setSearchOpen(true);
+        if (args.searchQuery.trim()) {
+            args.setSearchOpen(true);
         }
     }
 
     function clearSearch() {
-        setSearchQuery("");
-        setSearchResults([]);
-        setSearchOpen(false);
-    }
-
-    function closeDropdown() {
-        setSearchOpen(false);
+        args.setSearchQuery("");
+        args.setSearchResults([]);
+        args.setSearchOpen(false);
     }
 
     return {
-        searchQuery,
-        searchLoading,
-        searchWrapRef,
-        visibleResults,
-        searchOpen,
         onChangeSearch,
         onFocusSearch,
         clearSearch,
-        closeDropdown,
     };
+}
+
+
+export function useMovieSearchDropdown() {
+    const [searchQuery, setSearchQuery] = useState("");
+    const [searchOpen, setSearchOpen] = useState(false);
+    const [searchLoading, setSearchLoading] = useState(false);
+    const searchWrapRef = useRef<HTMLDivElement | null>(null);
+    const trimmedQuery = searchQuery.trim();
+    const { searchResults, setSearchResults } = useSearchResults(
+        trimmedQuery,
+        setSearchLoading
+    );
+    const searchControls = useSearchControls({ searchQuery, setSearchQuery, setSearchResults, setSearchOpen, setSearchLoading });
+    const visibleResults = useMemo(() => searchResults.slice(0, 5), [searchResults]);
+    useCloseOnOutsideClick(searchWrapRef, setSearchOpen);
+    return { searchQuery, searchLoading, searchWrapRef, visibleResults, searchOpen, ...searchControls, closeDropdown: () => setSearchOpen(false) };
 }
