@@ -2,45 +2,35 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { searchMovies } from "../shared/api/movies";
 import type { Movie } from "../shared/types/movie";
 
+async function loadSearchResults(args: {
+    trimmedQuery: string;
+    signal: AbortSignal;
+    setSearchResults: React.Dispatch<React.SetStateAction<Movie[]>>;
+    setSearchLoading: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
+    try {
+        args.setSearchResults(await searchMovies(args.trimmedQuery, args.signal));
+    } catch {
+        if (!args.signal.aborted) args.setSearchResults([]);
+    } finally {
+        if (!args.signal.aborted) args.setSearchLoading(false);
+    }
+}
+
 function useSearchResults(
     trimmedQuery: string,
     setSearchLoading: React.Dispatch<React.SetStateAction<boolean>>
 ) {
     const [searchResults, setSearchResults] = useState<Movie[]>([]);
-
     useEffect(() => {
-        if (!trimmedQuery) {
-            setSearchResults([]);
-            return;
-        }
-
+        if (!trimmedQuery) return;
         const controller = new AbortController();
-
-        const timeoutId = window.setTimeout(async () => {
-            try {
-                const movies = await searchMovies(
-                    trimmedQuery,
-                    controller.signal
-                );
-
-                setSearchResults(movies);
-            } catch {
-                if (!controller.signal.aborted) {
-                    setSearchResults([]);
-                }
-            } finally {
-                if (!controller.signal.aborted) {
-                    setSearchLoading(false);
-                }
-            }
-        }, 300);
-
-        return () => {
-            controller.abort();
-            window.clearTimeout(timeoutId);
-        };
+        const timeoutId = window.setTimeout(
+            () => void loadSearchResults({ trimmedQuery, signal: controller.signal, setSearchResults, setSearchLoading }),
+            300
+        );
+        return () => { controller.abort(); window.clearTimeout(timeoutId); };
     }, [setSearchLoading, trimmedQuery]);
-
     return { searchResults, setSearchResults };
 }
 
