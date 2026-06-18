@@ -34,29 +34,25 @@ function useSearchResults(
     return { searchResults, setSearchResults };
 }
 
+function closeSearchOnOutsideClick(args: {
+    searchWrapRef: React.RefObject<HTMLDivElement | null>;
+    setSearchOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    event: MouseEvent;
+}) {
+    const node = args.searchWrapRef.current;
+    if (!node || node.contains(args.event.target as Node)) return;
+    args.setSearchOpen(false);
+}
+
 function useCloseOnOutsideClick(
     searchWrapRef: React.RefObject<HTMLDivElement | null>,
     setSearchOpen: React.Dispatch<React.SetStateAction<boolean>>
 ) {
     useEffect(() => {
-        function handleClickOutside(event: MouseEvent) {
-            const node = searchWrapRef.current;
-
-            if (!node) return;
-
-            if (node.contains(event.target as Node)) return;
-
-            setSearchOpen(false);
-        }
-
+        const handleClickOutside = (event: MouseEvent) =>
+            closeSearchOnOutsideClick({ searchWrapRef, setSearchOpen, event });
         window.addEventListener("click", handleClickOutside);
-
-        return () => {
-            window.removeEventListener(
-                "click",
-                handleClickOutside
-            );
-        };
+        return () => window.removeEventListener("click", handleClickOutside);
     }, [searchWrapRef, setSearchOpen]);
 }
 
