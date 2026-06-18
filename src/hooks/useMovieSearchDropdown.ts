@@ -56,6 +56,26 @@ function useCloseOnOutsideClick(
     }, [searchWrapRef, setSearchOpen]);
 }
 
+function applySearchValue(args: {
+    value: string;
+    setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
+    setSearchResults: React.Dispatch<React.SetStateAction<Movie[]>>;
+    setSearchOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    setSearchLoading: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
+    args.setSearchQuery(args.value);
+
+    if (!args.value.trim()) {
+        args.setSearchResults([]);
+        args.setSearchOpen(false);
+        args.setSearchLoading(false);
+        return;
+    }
+
+    args.setSearchLoading(true);
+    args.setSearchOpen(true);
+}
+
 function useSearchControls(args: {
     searchQuery: string;
     setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
@@ -64,17 +84,13 @@ function useSearchControls(args: {
     setSearchLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
     function onChangeSearch(value: string) {
-        args.setSearchQuery(value);
-
-        if (!value.trim()) {
-            args.setSearchResults([]);
-            args.setSearchOpen(false);
-            args.setSearchLoading(false);
-            return;
-        }
-
-        args.setSearchLoading(true);
-        args.setSearchOpen(true);
+        applySearchValue({
+            value,
+            setSearchQuery: args.setSearchQuery,
+            setSearchResults: args.setSearchResults,
+            setSearchOpen: args.setSearchOpen,
+            setSearchLoading: args.setSearchLoading,
+        });
     }
 
     function onFocusSearch() {
