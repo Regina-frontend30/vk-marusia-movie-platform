@@ -27,17 +27,25 @@ function isLoginFormInvalid(formValues: {
     );
 }
 
+function hasEmptyRegisterFields(formValues: {
+    firstName: string;
+    lastName: string;
+    passwordConfirm: string;
+}) {
+    return (
+        !formValues.firstName.trim() ||
+        !formValues.lastName.trim() ||
+        !formValues.passwordConfirm.trim()
+    );
+}
+
 function getRegisterError(formValues: {
     firstName: string;
     lastName: string;
     password: string;
     passwordConfirm: string;
 }) {
-    if (
-        !formValues.firstName.trim() ||
-        !formValues.lastName.trim() ||
-        !formValues.passwordConfirm.trim()
-    ) {
+    if (hasEmptyRegisterFields(formValues)) {
         return "Заполните все поля регистрации";
     }
 
