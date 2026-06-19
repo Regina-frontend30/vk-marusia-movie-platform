@@ -17,6 +17,95 @@ type Props = {
     onClose: () => void;
 };
 
+function isLoginFormInvalid(formValues: {
+    email: string;
+    password: string;
+}) {
+    return (
+        !formValues.email.trim() ||
+        !formValues.password.trim()
+    );
+}
+
+function getRegisterError(formValues: {
+    firstName: string;
+    lastName: string;
+    password: string;
+    passwordConfirm: string;
+}) {
+    if (
+        !formValues.firstName.trim() ||
+        !formValues.lastName.trim() ||
+        !formValues.passwordConfirm.trim()
+    ) {
+        return "Заполните все поля регистрации";
+    }
+
+    if (
+        formValues.password !==
+        formValues.passwordConfirm
+    ) {
+        return "Пароли не совпадают";
+    }
+
+    return null;
+}
+
+async function submitLogin(args: {
+    email: string;
+    password: string;
+    refreshUser: () => Promise<void>;
+    onClose: () => void;
+    navigate: ReturnType<typeof useNavigate>;
+}) {
+    await login(args.email, args.password);
+    await args.refreshUser();
+    args.onClose();
+    args.navigate("/account", { replace: true });
+}
+
+async function submitRegister(args: {
+    formValues: {
+        email: string;
+        password: string;
+        firstName: string;
+        lastName: string;
+        passwordConfirm: string;
+    };
+    setError: (message: string) => void;
+    setMode: (mode: AuthMode) => void;
+}) {
+    const registerError = getRegisterError(args.formValues);
+
+    if (registerError) {
+        args.setError(registerError);
+        return;
+    }
+
+    await register({
+        email: args.formValues.email,
+        password: args.formValues.password,
+        firstName: args.formValues.firstName,
+        lastName: args.formValues.lastName,
+    });
+
+    args.setMode("success");
+}
+
+function handleAuthError(
+    caughtError: unknown,
+    setError: (message: string) => void,
+) {
+    console.error("AUTH ERROR:", caughtError);
+
+    if (caughtError instanceof ApiError) {
+        setError(caughtError.message || "Ошибка запроса");
+        return;
+    }
+
+    setError("Не удалось связаться с сервером");
+}
+
 export function useAuthModal({
     onClose,
 }: Props) {
@@ -65,72 +154,21 @@ export function useAuthModal({
         e: React.FormEvent<HTMLFormElement>,
     ) {
         e.preventDefault();
-
         setSubmitted(true);
         setError(null);
-
-        if (
-            !formValues.email.trim() ||
-            !formValues.password.trim()
-        ) {
-            return;
-        }
-
+        if (isLoginFormInvalid(formValues)) return;
         setLoading(true);
-
         try {
             if (mode === "login") {
-                await login(
-                    formValues.email,
-                    formValues.password,
-                );
-
-                await refreshUser();
-                onClose();
-                navigate("/account", {
-                    replace: true,
-                });
+                await submitLogin({ email: formValues.email, password: formValues.password, refreshUser, onClose, navigate });
                 return;
             }
 
             if (mode === "register") {
-                if (
-                    !formValues.firstName.trim() ||
-                    !formValues.lastName.trim() ||
-                    !formValues.passwordConfirm.trim()
-                ) {
-                    setError("Заполните все поля регистрации");
-                    return;
-                }
-
-                if (
-                    formValues.password !==
-                    formValues.passwordConfirm
-                ) {
-                    setError("Пароли не совпадают");
-                    return;
-                }
-
-                await register({
-                    email: formValues.email,
-                    password: formValues.password,
-                    firstName: formValues.firstName,
-                    lastName: formValues.lastName,
-                });
-
-                setMode("success");
+                await submitRegister({ formValues, setError, setMode });
             }
         } catch (caughtError: unknown) {
-            console.error("AUTH ERROR:", caughtError);
-
-            if (caughtError instanceof ApiError) {
-                setError(
-                    caughtError.message || "Ошибка запроса",
-                );
-                return;
-            }
-
-            setError("Не удалось связаться с сервером");
+            handleAuthError(caughtError, setError);
         } finally {
             setLoading(false);
         }
