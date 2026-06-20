@@ -36,25 +36,26 @@ function normalizeMoviesResponse(response: unknown): Movie[] {
     return [];
 }
 
+function selectGenreImageUrl(movies: Movie[]) {
+    const movieWithBackdrop = movies.find(
+        (movie) => Boolean(movie.backdropUrl)
+    );
+
+    return (
+        movieWithBackdrop?.backdropUrl ??
+        movies[0]?.backdropUrl ??
+        movies[0]?.posterUrl ??
+        null
+    );
+}
+
 async function buildGenreCard(name: string): Promise<GenreCard> {
     try {
         const response = await getMoviesByGenre(name);
-
         const movies = normalizeMoviesResponse(response);
-
-        const movieWithBackdrop = movies.find(
-            (movie) => Boolean(movie.backdropUrl)
-        );
-
-        const imageUrl =
-            movieWithBackdrop?.backdropUrl ??
-            movies[0]?.backdropUrl ??
-            movies[0]?.posterUrl ??
-            null;
-
         return {
             name,
-            imageUrl,
+            imageUrl: selectGenreImageUrl(movies),
         };
     } catch (error) {
         console.error(error);
