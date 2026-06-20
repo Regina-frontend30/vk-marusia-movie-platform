@@ -17,6 +17,14 @@ type Props = {
     onClose: () => void;
 };
 
+type AuthFormValues = {
+    email: string;
+    password: string;
+    firstName: string;
+    lastName: string;
+    passwordConfirm: string;
+};
+
 function isLoginFormInvalid(formValues: {
     email: string;
     password: string;
@@ -59,6 +67,20 @@ function getRegisterError(formValues: {
     return null;
 }
 
+function createRegisterPayload(formValues: {
+    email: string;
+    password: string;
+    firstName: string;
+    lastName: string;
+}) {
+    return {
+        email: formValues.email,
+        password: formValues.password,
+        firstName: formValues.firstName,
+        lastName: formValues.lastName,
+    };
+}
+
 async function submitLogin(args: {
     email: string;
     password: string;
@@ -90,13 +112,7 @@ async function submitRegister(args: {
         return;
     }
 
-    await register({
-        email: args.formValues.email,
-        password: args.formValues.password,
-        firstName: args.formValues.firstName,
-        lastName: args.formValues.lastName,
-    });
-
+    await register(createRegisterPayload(args.formValues));
     args.setMode("success");
 }
 
@@ -114,83 +130,69 @@ function handleAuthError(
     setError("Не удалось связаться с сервером");
 }
 
-export function useAuthModal({
-    onClose,
-}: Props) {
-    const navigate = useNavigate();
-    const { refreshUser } = useAuth();
-
+function useAuthFormState() {
     const [mode, setMode] =
         useState<AuthMode>("login");
-
     const [loading, setLoading] =
         useState(false);
-
     const [submitted, setSubmitted] =
         useState(false);
-
     const [error, setError] =
         useState<string | null>(null);
-
-    const [formValues, setFormValues] = useState({
+    const [formValues, setFormValues] = useState<AuthFormValues>({
         email: "",
         password: "",
         firstName: "",
         lastName: "",
         passwordConfirm: "",
     });
+    const setFormField = (field: string, value: string) =>
+        setFormValues((prev) => ({ ...prev, [field]: value }));
+    return { mode, setMode, loading, setLoading, submitted, setSubmitted, error, setError, formValues, setFormField, goLogin: () => setMode("login"), goRegister: () => setMode("register") };
+}
 
-    function setFormField(
-        field: string,
-        value: string,
-    ) {
-        setFormValues((prev) => ({
-            ...prev,
-            [field]: value,
-        }));
-    }
-
-    function goLogin() {
-        setMode("login");
-    }
-
-    function goRegister() {
-        setMode("register");
-    }
-
-    async function onSubmit(
+function createSubmitHandler(args: {
+    mode: AuthMode;
+    formValues: AuthFormValues;
+    setSubmitted: (value: boolean) => void;
+    setError: (value: string | null) => void;
+    setLoading: (value: boolean) => void;
+    refreshUser: () => Promise<void>;
+    onClose: () => void;
+    navigate: ReturnType<typeof useNavigate>;
+    setMode: (mode: AuthMode) => void;
+}) {
+    return async function onSubmit(
         e: React.FormEvent<HTMLFormElement>,
     ) {
         e.preventDefault();
-        setSubmitted(true);
-        setError(null);
-        if (isLoginFormInvalid(formValues)) return;
-        setLoading(true);
+        args.setSubmitted(true);
+        args.setError(null);
+        if (isLoginFormInvalid(args.formValues)) return;
+        args.setLoading(true);
         try {
-            if (mode === "login") {
-                await submitLogin({ email: formValues.email, password: formValues.password, refreshUser, onClose, navigate });
+            if (args.mode === "login") {
+                await submitLogin({ email: args.formValues.email, password: args.formValues.password, refreshUser: args.refreshUser, onClose: args.onClose, navigate: args.navigate });
                 return;
             }
 
-            if (mode === "register") {
-                await submitRegister({ formValues, setError, setMode });
+            if (args.mode === "register") {
+                await submitRegister({ formValues: args.formValues, setError: args.setError as (message: string) => void, setMode: args.setMode });
             }
         } catch (caughtError: unknown) {
-            handleAuthError(caughtError, setError);
+            handleAuthError(caughtError, args.setError as (message: string) => void);
         } finally {
-            setLoading(false);
+            args.setLoading(false);
         }
-    }
-
-    return {
-        mode,
-        loading,
-        submitted,
-        error,
-        formValues,
-        setFormField,
-        goLogin,
-        goRegister,
-        onSubmit,
     };
+}
+
+export function useAuthModal({
+    onClose,
+}: Props) {
+    const navigate = useNavigate();
+    const { refreshUser } = useAuth();
+    const formState = useAuthFormState();
+    const onSubmit = createSubmitHandler({ mode: formState.mode, formValues: formState.formValues, setSubmitted: formState.setSubmitted, setError: formState.setError, setLoading: formState.setLoading, refreshUser, onClose, navigate, setMode: formState.setMode });
+    return { ...formState, onSubmit };
 }
