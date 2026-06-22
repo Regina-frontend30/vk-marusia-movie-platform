@@ -11,29 +11,31 @@ type GenreCard = {
     imageUrl: string | null;
 };
 
+type GenreMoviesEffectArgs = {
+    genreName: string | null;
+    moviesPageSize: number;
+    setMovies: (movies: Movie[]) => void;
+    setMoviesLoading: (loading: boolean) => void;
+    setVisibleCount: (count: number) => void;
+};
+
+function getMovieArray(value: unknown): Movie[] | null {
+    return Array.isArray(value)
+        ? (value as Movie[])
+        : null;
+}
+
 function normalizeMoviesResponse(response: unknown): Movie[] {
-    if (Array.isArray(response)) {
-        return response as Movie[];
-    }
-
-    if (!response || typeof response !== "object") {
-        return [];
-    }
-
+    const responseMovies = getMovieArray(response);
+    if (responseMovies) return responseMovies;
+    if (!response || typeof response !== "object") return [];
     const responseObject = response as {
         movies?: unknown;
         results?: unknown;
     };
-
-    if (Array.isArray(responseObject.movies)) {
-        return responseObject.movies as Movie[];
-    }
-
-    if (Array.isArray(responseObject.results)) {
-        return responseObject.results as Movie[];
-    }
-
-    return [];
+    return getMovieArray(responseObject.movies)
+        ?? getMovieArray(responseObject.results)
+        ?? [];
 }
 
 function selectGenreImageUrl(movies: Movie[]) {
@@ -71,108 +73,133 @@ function decodeGenreParam(genre?: string) {
     return genre ? decodeURIComponent(genre) : null;
 }
 
-export function useGenresPage(genreParam?: string) {
-    const moviesPageSize = 10;
+async function loadGenreMovies(genreName: string) {
+    const response = await getMoviesByGenre(genreName);
+    const movies = normalizeMoviesResponse(response);
+    return movies
+        .slice()
+        .sort(
+            (leftMovie, rightMovie) =>
+                (rightMovie.tmdbRating ?? 0) -
+                (leftMovie.tmdbRating ?? 0)
+        );
+}
 
-    const genreName = useMemo(
-        () => decodeGenreParam(genreParam),
-        [genreParam]
+async function loadGenreCards() {
+    const genreList: Genre[] = await getGenres();
+    return Promise.all(
+        genreList.map((genre) =>
+            buildGenreCard(genre.name)
+        )
     );
+}
 
+function createShowMoreHandler(args: {
+    moviesLength: number;
+    moviesPageSize: number;
+    setVisibleCount: React.Dispatch<React.SetStateAction<number>>;
+}) {
+    return function showMore() {
+        args.setVisibleCount((count) =>
+            Math.min(
+                count + args.moviesPageSize,
+                args.moviesLength
+            )
+        );
+    };
+}
+
+async function loadGenreMoviesState(args: {
+    genreName: string;
+    moviesPageSize: number;
+    setMovies: (movies: Movie[]) => void;
+    setMoviesLoading: (loading: boolean) => void;
+    setVisibleCount: (count: number) => void;
+}) {
+    try {
+        args.setMoviesLoading(true);
+        args.setMovies(await loadGenreMovies(args.genreName));
+        args.setVisibleCount(args.moviesPageSize);
+    } catch (error) {
+        console.error(error);
+        args.setMovies([]);
+    } finally {
+        args.setMoviesLoading(false);
+    }
+}
+
+async function loadGenresState(args: {
+    setGenres: (genres: GenreCard[]) => void;
+    setLoading: (loading: boolean) => void;
+}) {
+    try {
+        args.setGenres(await loadGenreCards());
+    } catch (error) {
+        console.error(error);
+        args.setGenres([]);
+    } finally {
+        args.setLoading(false);
+    }
+}
+
+function useGenresData({
+    setGenres,
+    setLoading,
+}: {
+    setGenres: (genres: GenreCard[]) => void;
+    setLoading: (loading: boolean) => void;
+}) {
+    useEffect(() => {
+        void loadGenresState({ setGenres, setLoading });
+    }, [setGenres, setLoading]);
+}
+
+function useGenreMoviesEffect({
+    genreName,
+    moviesPageSize,
+    setMovies,
+    setMoviesLoading,
+    setVisibleCount,
+}: GenreMoviesEffectArgs) {
+    useEffect(() => {
+        if (!genreName) return;
+        void loadGenreMoviesState({
+            genreName,
+            moviesPageSize,
+            setMovies,
+            setMoviesLoading,
+            setVisibleCount,
+        });
+    }, [genreName, moviesPageSize, setMovies, setMoviesLoading, setVisibleCount]);
+}
+
+function useGenresPageState(moviesPageSize: number) {
     const [genres, setGenres] = useState<GenreCard[]>([]);
     const [movies, setMovies] = useState<Movie[]>([]);
-
     const [loading, setLoading] = useState(true);
     const [moviesLoading, setMoviesLoading] = useState(false);
-
     const [visibleCount, setVisibleCount] =
         useState(moviesPageSize);
-
-    useEffect(() => {
-        async function loadGenres() {
-            try {
-                const genreList: Genre[] =
-                    await getGenres();
-
-                setGenres(
-                    await Promise.all(
-                        genreList.map((genre) =>
-                            buildGenreCard(genre.name)
-                        )
-                    )
-                );
-            } catch (error) {
-                console.error(error);
-                setGenres([]);
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        void loadGenres();
-    }, []);
-
-    useEffect(() => {
-        async function loadMovies() {
-            if (!genreName) {
-                return;
-            }
-
-            try {
-                setMoviesLoading(true);
-
-                const response =
-                    await getMoviesByGenre(genreName);
-
-                const list =
-                    normalizeMoviesResponse(response);
-
-                setMovies(
-                    list
-                        .slice()
-                        .sort(
-                            (leftMovie, rightMovie) =>
-                                (rightMovie.tmdbRating ?? 0) -
-                                (leftMovie.tmdbRating ?? 0)
-                        )
-                );
-
-                setVisibleCount(moviesPageSize);
-            } catch (error) {
-                console.error(error);
-                setMovies([]);
-            } finally {
-                setMoviesLoading(false);
-            }
-        }
-
-        void loadMovies();
-    }, [genreName]);
-
     const visibleMovies = useMemo(
         () => movies.slice(0, visibleCount),
         [movies, visibleCount]
     );
+    const showMore = createShowMoreHandler({
+        moviesLength: movies.length,
+        moviesPageSize,
+        setVisibleCount,
+    });
+    return { genres, setGenres, movies, setMovies, loading, setLoading, moviesLoading, setMoviesLoading, visibleCount, setVisibleCount, visibleMovies, canShowMore: visibleCount < movies.length, showMore };
+}
 
-    const canShowMore =
-        visibleCount < movies.length;
-
-    function showMore() {
-        setVisibleCount((count) =>
-            Math.min(
-                count + moviesPageSize,
-                movies.length
-            )
-        );
-    }
-
-    return {
-        canShowMore,
-        genreName,
-        genres,
-        loading,
-        moviesLoading,
-        showMore,
-        visibleMovies,
-    };
+export function useGenresPage(genreParam?: string) {
+    const moviesPageSize = 10;
+    const genreName = useMemo(
+        () => decodeGenreParam(genreParam),
+        [genreParam]
+    );
+    const pageState = useGenresPageState(moviesPageSize);
+    useGenresData({ setGenres: pageState.setGenres, setLoading: pageState.setLoading });
+    useGenreMoviesEffect({ genreName, moviesPageSize, setMovies: pageState.setMovies, setMoviesLoading: pageState.setMoviesLoading, setVisibleCount: pageState.setVisibleCount });
+    return { canShowMore: pageState.canShowMore, genreName, genres: pageState.genres, loading: pageState.loading, moviesLoading: pageState.moviesLoading, showMore: pageState.showMore, visibleMovies: pageState.visibleMovies };
 }
