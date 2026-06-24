@@ -1,4 +1,10 @@
 const BASE_URL = "https://cinemaguide.skillbox.cc";
+const ERROR_MESSAGE_KEYS = [
+    "message",
+    "error",
+    "errorMessage",
+    "detail",
+] as const;
 
 export class ApiError extends Error {
     status: number;
@@ -21,54 +27,57 @@ function extractErrorMessage(
     body: unknown,
     status: number,
 ): string {
-    if (typeof body === "string" && body.trim()) {
-        return body.trim();
+    return (
+        getStringErrorMessage(body) ??
+        getObjectErrorMessage(body) ??
+        getStatusErrorMessage(status)
+    );
+}
+
+function getTrimmedString(value: unknown) {
+    return typeof value === "string" && value.trim()
+        ? value.trim()
+        : null;
+}
+
+function findObjectErrorMessage(record: Record<string, unknown>) {
+    for (const key of ERROR_MESSAGE_KEYS) {
+        const message = getTrimmedString(record[key]);
+        if (message) return message;
     }
 
-    if (body && typeof body === "object") {
-        const obj = body as Record<string, unknown>;
+    return null;
+}
 
-        for (const key of [
-            "message",
-            "error",
-            "errorMessage",
-            "detail",
-        ]) {
-            const value = obj[key];
-
-            if (typeof value === "string" && value.trim()) {
-                return value.trim();
-            }
-        }
-
-        const nestedErrors = obj.errors;
-
-        if (Array.isArray(nestedErrors) && nestedErrors.length > 0) {
-            const first = nestedErrors[0];
-
-            if (typeof first === "string" && first.trim()) {
-                return first.trim();
-            }
-
-            if (first && typeof first === "object") {
-                const firstObj = first as Record<string, unknown>;
-
-                for (const key of [
-                    "message",
-                    "error",
-                    "errorMessage",
-                    "detail",
-                ]) {
-                    const value = firstObj[key];
-
-                    if (typeof value === "string" && value.trim()) {
-                        return value.trim();
-                    }
-                }
-            }
-        }
+function getNestedArrayErrorMessage(errors: unknown) {
+    if (!Array.isArray(errors) || errors.length === 0) {
+        return null;
     }
 
+    const firstError = errors[0];
+    const stringMessage = getTrimmedString(firstError);
+    if (stringMessage) return stringMessage;
+    if (!firstError || typeof firstError !== "object") return null;
+    return findObjectErrorMessage(firstError as Record<string, unknown>);
+}
+
+function getStringErrorMessage(body: unknown) {
+    return getTrimmedString(body);
+}
+
+function getObjectErrorMessage(body: unknown) {
+    if (!body || typeof body !== "object") {
+        return null;
+    }
+
+    const record = body as Record<string, unknown>;
+    return (
+        findObjectErrorMessage(record) ??
+        getNestedArrayErrorMessage(record.errors)
+    );
+}
+
+function getStatusErrorMessage(status: number) {
     switch (status) {
         case 400:
             return "Некорректные данные запроса";
@@ -88,6 +97,14 @@ function extractErrorMessage(
         default:
             return "Ошибка запроса";
     }
+}
+
+function throwApiError(responseBody: unknown, status: number): never {
+    throw new ApiError({
+        message: extractErrorMessage(responseBody, status),
+        status,
+        data: responseBody,
+    });
 }
 
 async function readJsonSafe(response: Response) {
@@ -125,17 +142,7 @@ async function requestJson<T>(
 
     if (!response.ok) {
         const responseBody = await readResponseBody(response);
-
-        const message = extractErrorMessage(
-            responseBody,
-            response.status,
-        );
-
-        throw new ApiError({
-            message,
-            status: response.status,
-            data: responseBody,
-        });
+        throwApiError(responseBody, response.status);
     }
 
     return response.json() as Promise<T>;

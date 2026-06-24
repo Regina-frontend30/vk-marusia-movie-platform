@@ -25,6 +25,18 @@ type AuthFormValues = {
     passwordConfirm: string;
 };
 
+type SubmitHandlerArgs = {
+    mode: AuthMode;
+    formValues: AuthFormValues;
+    setSubmitted: (value: boolean) => void;
+    setError: (value: string | null) => void;
+    setLoading: (value: boolean) => void;
+    refreshUser: () => Promise<void>;
+    onClose: () => void;
+    navigate: ReturnType<typeof useNavigate>;
+    setMode: (mode: AuthMode) => void;
+};
+
 function isLoginFormInvalid(formValues: {
     email: string;
     password: string;
@@ -130,6 +142,47 @@ function handleAuthError(
     setError("Не удалось связаться с сервером");
 }
 
+function resetSubmitState(args: {
+    setSubmitted: (value: boolean) => void;
+    setError: (value: string | null) => void;
+}) {
+    args.setSubmitted(true);
+    args.setError(null);
+}
+
+async function submitAuthByMode(args: SubmitHandlerArgs) {
+    if (args.mode === "login") {
+        await submitLogin({ email: args.formValues.email, password: args.formValues.password, refreshUser: args.refreshUser, onClose: args.onClose, navigate: args.navigate });
+        return;
+    }
+
+    if (args.mode === "register") {
+        await submitRegister({ formValues: args.formValues, setError: args.setError as (message: string) => void, setMode: args.setMode });
+    }
+}
+
+async function submitAuthForm(args: SubmitHandlerArgs) {
+    resetSubmitState(args);
+    if (isLoginFormInvalid(args.formValues)) return;
+    args.setLoading(true);
+    try {
+        await submitAuthByMode(args);
+    } catch (caughtError: unknown) {
+        handleAuthError(caughtError, args.setError as (message: string) => void);
+    } finally {
+        args.setLoading(false);
+    }
+}
+
+function createSubmitEventHandler(args: SubmitHandlerArgs) {
+    return async function onSubmit(
+        e: React.FormEvent<HTMLFormElement>,
+    ) {
+        e.preventDefault();
+        await submitAuthForm(args);
+    };
+}
+
 function useAuthFormState() {
     const [mode, setMode] =
         useState<AuthMode>("login");
@@ -151,40 +204,8 @@ function useAuthFormState() {
     return { mode, setMode, loading, setLoading, submitted, setSubmitted, error, setError, formValues, setFormField, goLogin: () => setMode("login"), goRegister: () => setMode("register") };
 }
 
-function createSubmitHandler(args: {
-    mode: AuthMode;
-    formValues: AuthFormValues;
-    setSubmitted: (value: boolean) => void;
-    setError: (value: string | null) => void;
-    setLoading: (value: boolean) => void;
-    refreshUser: () => Promise<void>;
-    onClose: () => void;
-    navigate: ReturnType<typeof useNavigate>;
-    setMode: (mode: AuthMode) => void;
-}) {
-    return async function onSubmit(
-        e: React.FormEvent<HTMLFormElement>,
-    ) {
-        e.preventDefault();
-        args.setSubmitted(true);
-        args.setError(null);
-        if (isLoginFormInvalid(args.formValues)) return;
-        args.setLoading(true);
-        try {
-            if (args.mode === "login") {
-                await submitLogin({ email: args.formValues.email, password: args.formValues.password, refreshUser: args.refreshUser, onClose: args.onClose, navigate: args.navigate });
-                return;
-            }
-
-            if (args.mode === "register") {
-                await submitRegister({ formValues: args.formValues, setError: args.setError as (message: string) => void, setMode: args.setMode });
-            }
-        } catch (caughtError: unknown) {
-            handleAuthError(caughtError, args.setError as (message: string) => void);
-        } finally {
-            args.setLoading(false);
-        }
-    };
+function createSubmitHandler(args: SubmitHandlerArgs) {
+    return createSubmitEventHandler(args);
 }
 
 export function useAuthModal({

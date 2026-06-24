@@ -76,6 +76,38 @@ function applySearchValue(args: {
     args.setSearchOpen(true);
 }
 
+function createSearchChangeHandler(args: {
+    setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
+    setSearchResults: React.Dispatch<React.SetStateAction<Movie[]>>;
+    setSearchOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    setSearchLoading: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
+    return function onChangeSearch(value: string) {
+        applySearchValue({ value, setSearchQuery: args.setSearchQuery, setSearchResults: args.setSearchResults, setSearchOpen: args.setSearchOpen, setSearchLoading: args.setSearchLoading });
+    };
+}
+
+function createSearchFocusHandler(args: {
+    searchQuery: string;
+    setSearchOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
+    return function onFocusSearch() {
+        if (args.searchQuery.trim()) args.setSearchOpen(true);
+    };
+}
+
+function createClearSearchHandler(args: {
+    setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
+    setSearchResults: React.Dispatch<React.SetStateAction<Movie[]>>;
+    setSearchOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
+    return function clearSearch() {
+        args.setSearchQuery("");
+        args.setSearchResults([]);
+        args.setSearchOpen(false);
+    };
+}
+
 function useSearchControls(args: {
     searchQuery: string;
     setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
@@ -83,32 +115,10 @@ function useSearchControls(args: {
     setSearchOpen: React.Dispatch<React.SetStateAction<boolean>>;
     setSearchLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
-    function onChangeSearch(value: string) {
-        applySearchValue({
-            value,
-            setSearchQuery: args.setSearchQuery,
-            setSearchResults: args.setSearchResults,
-            setSearchOpen: args.setSearchOpen,
-            setSearchLoading: args.setSearchLoading,
-        });
-    }
-
-    function onFocusSearch() {
-        if (args.searchQuery.trim()) {
-            args.setSearchOpen(true);
-        }
-    }
-
-    function clearSearch() {
-        args.setSearchQuery("");
-        args.setSearchResults([]);
-        args.setSearchOpen(false);
-    }
-
     return {
-        onChangeSearch,
-        onFocusSearch,
-        clearSearch,
+        onChangeSearch: createSearchChangeHandler(args),
+        onFocusSearch: createSearchFocusHandler(args),
+        clearSearch: createClearSearchHandler(args),
     };
 }
 
