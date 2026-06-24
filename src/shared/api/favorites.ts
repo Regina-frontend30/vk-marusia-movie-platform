@@ -2,6 +2,8 @@ import { ApiError } from "./auth";
 
 const BASE_URL = "https://cinemaguide.skillbox.cc";
 
+const RETRYABLE_FAVORITE_ERROR_STATUSES = [400, 404, 405];
+
 async function readErrorText(response: Response) {
   try {
     return await response.text();
@@ -20,22 +22,24 @@ async function requestFavorite(
   });
 
   if (!response.ok) {
-    const message =
-      (await readErrorText(response)) ||
-      "Ошибка работы с избранным";
-
-    throw new ApiError({
-      message,
-      status: response.status,
-      data: null,
-    });
+    await throwFavoriteError(response);
   }
 }
 
-export async function addFavorite(
-  movieId: number
-) {
-  const attempts: RequestInit[] = [
+async function throwFavoriteError(response: Response): Promise<never> {
+  const message =
+    (await readErrorText(response)) ||
+    "Ошибка работы с избранным";
+
+  throw new ApiError({
+    message,
+    status: response.status,
+    data: null,
+  });
+}
+
+function createFavoriteAttempts(movieId: number): RequestInit[] {
+  return [
     {
       method: "POST",
       headers: {
@@ -61,27 +65,43 @@ export async function addFavorite(
       }),
     },
   ];
+}
 
+function shouldThrowFavoriteError(error: unknown) {
+  return (
+    error instanceof ApiError &&
+    !RETRYABLE_FAVORITE_ERROR_STATUSES.includes(error.status)
+  );
+}
+
+async function tryAddFavoriteAttempt(
+  attempt: RequestInit
+): Promise<unknown> {
+  try {
+    await requestFavorite(
+      `${BASE_URL}/favorites`,
+      attempt
+    );
+    return null;
+  } catch (error) {
+    if (shouldThrowFavoriteError(error)) {
+      throw error;
+    }
+
+    return error;
+  }
+}
+
+export async function addFavorite(
+  movieId: number
+) {
+  const attempts = createFavoriteAttempts(movieId);
   let lastError: unknown = null;
 
   for (const attempt of attempts) {
-    try {
-      await requestFavorite(
-        `${BASE_URL}/favorites`,
-        attempt
-      );
+    lastError = await tryAddFavoriteAttempt(attempt);
+    if (!lastError) {
       return;
-    } catch (error) {
-      lastError = error;
-
-      if (
-        error instanceof ApiError &&
-        error.status !== 400 &&
-        error.status !== 404 &&
-        error.status !== 405
-      ) {
-        throw error;
-      }
     }
   }
 
