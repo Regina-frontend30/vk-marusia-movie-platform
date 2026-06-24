@@ -27,6 +27,24 @@ type HeaderLayoutProps = {
   searchController: SearchController;
 };
 
+type SearchClearButtonProps = {
+  searchQuery: string;
+  isMobileSearchOpen: boolean;
+  clearSearch: () => void;
+  closeMobileSearch: () => void;
+};
+
+type SearchDropdownProps = {
+  searchLoading: boolean;
+  visibleResults: SearchController["visibleResults"];
+  onSelect: () => void;
+};
+
+type HeaderSearchProps = SearchController & {
+  isMobileSearchOpen: boolean;
+  closeMobileSearch: () => void;
+};
+
 function formatRuntime(runtime: number) {
   if (!runtime) {
     return "";
@@ -83,12 +101,7 @@ function SearchClearButton({
   isMobileSearchOpen,
   clearSearch,
   closeMobileSearch,
-}: {
-  searchQuery: string;
-  isMobileSearchOpen: boolean;
-  clearSearch: () => void;
-  closeMobileSearch: () => void;
-}) {
+}: SearchClearButtonProps) {
   if (!searchQuery && !isMobileSearchOpen) {
     return null;
   }
@@ -97,6 +110,23 @@ function SearchClearButton({
     <button type="button" className="header__search-clear" onClick={searchQuery ? clearSearch : closeMobileSearch} aria-label="Очистить поиск">
       ×
     </button>
+  );
+}
+
+function SearchResultList({
+  visibleResults,
+  onSelect,
+}: Pick<SearchDropdownProps, "visibleResults" | "onSelect">) {
+  return (
+    <>
+      {visibleResults.map((movie) => (
+        <SearchResultItem
+          key={movie.id}
+          movie={movie}
+          onSelect={onSelect}
+        />
+      ))}
+    </>
   );
 }
 
@@ -133,23 +163,45 @@ function SearchDropdown({
   searchLoading,
   visibleResults,
   onSelect,
-}: {
-  searchLoading: boolean;
-  visibleResults: SearchController["visibleResults"];
-  onSelect: () => void;
-}) {
+}: SearchDropdownProps) {
   if (searchLoading) {
     return <div className="header__search-empty">Загрузка...</div>;
   }
 
   return visibleResults.length > 0 ? (
-    <>
-      {visibleResults.map((movie) => (
-        <SearchResultItem key={movie.id} movie={movie} onSelect={onSelect} />
-      ))}
-    </>
+    <SearchResultList
+      visibleResults={visibleResults}
+      onSelect={onSelect}
+    />
   ) : (
     <div className="header__search-empty">Ничего не найдено</div>
+  );
+}
+
+function SearchInput({
+  searchQuery,
+  onChangeSearch,
+  onFocusSearch,
+}: Pick<
+  SearchController,
+  "searchQuery" | "onChangeSearch" | "onFocusSearch"
+>) {
+  return (
+    <input
+      className="header__search"
+      placeholder="Поиск"
+      value={searchQuery}
+      onChange={(event) => onChangeSearch(event.target.value)}
+      onFocus={onFocusSearch}
+    />
+  );
+}
+
+function SearchDropdownPanel(props: SearchDropdownProps) {
+  return (
+    <div className="header__search-dropdown">
+      <SearchDropdown {...props} />
+    </div>
   );
 }
 
@@ -165,10 +217,7 @@ function HeaderSearch({
   closeDropdown,
   isMobileSearchOpen,
   closeMobileSearch,
-}: SearchController & {
-  isMobileSearchOpen: boolean;
-  closeMobileSearch: () => void;
-}) {
+}: HeaderSearchProps) {
   const handleSelectMovie = () => {
     closeDropdown();
     closeMobileSearch();
@@ -177,9 +226,9 @@ function HeaderSearch({
   return (
     <div className={`header__search-wrap ${isMobileSearchOpen ? "header__search-wrap--mobile-open" : ""}`} ref={searchWrapRef}>
       <span className="header__search-icon" aria-hidden="true"><svg><use href={`${spriteUrl}#icon-search`} /></svg></span>
-      <input className="header__search" placeholder="Поиск" value={searchQuery} onChange={(event) => onChangeSearch(event.target.value)} onFocus={onFocusSearch} />
+      <SearchInput searchQuery={searchQuery} onChangeSearch={onChangeSearch} onFocusSearch={onFocusSearch} />
       <SearchClearButton searchQuery={searchQuery} isMobileSearchOpen={isMobileSearchOpen} clearSearch={clearSearch} closeMobileSearch={closeMobileSearch} />
-      {searchOpen ? <div className="header__search-dropdown"><SearchDropdown searchLoading={searchLoading} visibleResults={visibleResults} onSelect={handleSelectMovie} /></div> : null}
+      {searchOpen ? <SearchDropdownPanel searchLoading={searchLoading} visibleResults={visibleResults} onSelect={handleSelectMovie} /> : null}
     </div>
   );
 }
