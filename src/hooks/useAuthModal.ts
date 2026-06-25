@@ -118,14 +118,22 @@ async function submitRegister(args: {
     setMode: (mode: AuthMode) => void;
 }) {
     const registerError = getRegisterError(args.formValues);
-
-    if (registerError) {
-        args.setError(registerError);
-        return;
-    }
+    if (applyRegisterError(registerError, args.setError)) return;
 
     await register(createRegisterPayload(args.formValues));
     args.setMode("success");
+}
+
+function applyRegisterError(
+    registerError: string | null,
+    setError: (message: string) => void,
+) {
+    if (!registerError) {
+        return false;
+    }
+
+    setError(registerError);
+    return true;
 }
 
 function handleAuthError(

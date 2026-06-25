@@ -6,6 +6,14 @@ const ERROR_MESSAGE_KEYS = [
     "detail",
 ] as const;
 
+const STATUS_ERROR_MESSAGES: Record<number, string> = {
+    400: "Некорректные данные запроса",
+    401: "Неверный логин или пароль",
+    403: "Доступ запрещён",
+    404: "Ресурс не найден",
+    409: "Пользователь с такой почтой уже существует",
+};
+
 export class ApiError extends Error {
     status: number;
     data: unknown;
@@ -77,26 +85,22 @@ function getObjectErrorMessage(body: unknown) {
     );
 }
 
+function getServerErrorMessage() {
+    return "Сервер недоступен. Попробуйте позже";
+}
+
+function isServerErrorStatus(status: number) {
+    return [500, 502, 503, 504].includes(status);
+}
+
 function getStatusErrorMessage(status: number) {
-    switch (status) {
-        case 400:
-            return "Некорректные данные запроса";
-        case 401:
-            return "Неверный логин или пароль";
-        case 403:
-            return "Доступ запрещён";
-        case 404:
-            return "Ресурс не найден";
-        case 409:
-            return "Пользователь с такой почтой уже существует";
-        case 500:
-        case 502:
-        case 503:
-        case 504:
-            return "Сервер недоступен. Попробуйте позже";
-        default:
-            return "Ошибка запроса";
+    if (status in STATUS_ERROR_MESSAGES) {
+        return STATUS_ERROR_MESSAGES[status];
     }
+
+    return isServerErrorStatus(status)
+        ? getServerErrorMessage()
+        : "Ошибка запроса";
 }
 
 function throwApiError(responseBody: unknown, status: number): never {

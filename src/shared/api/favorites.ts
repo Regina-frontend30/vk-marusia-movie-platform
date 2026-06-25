@@ -38,32 +38,36 @@ async function throwFavoriteError(response: Response): Promise<never> {
   });
 }
 
+function createJsonFavoriteAttempt(
+  body: Record<string, number>
+): RequestInit {
+  return {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  };
+}
+
+function createFormFavoriteAttempt(movieId: number): RequestInit {
+  return {
+    method: "POST",
+    headers: {
+      "Content-Type":
+        "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({
+      id: String(movieId),
+    }),
+  };
+}
+
 function createFavoriteAttempts(movieId: number): RequestInit[] {
   return [
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ id: movieId }),
-    },
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ movieId }),
-    },
-    {
-      method: "POST",
-      headers: {
-        "Content-Type":
-          "application/x-www-form-urlencoded",
-      },
-      body: new URLSearchParams({
-        id: String(movieId),
-      }),
-    },
+    createJsonFavoriteAttempt({ id: movieId }),
+    createJsonFavoriteAttempt({ movieId }),
+    createFormFavoriteAttempt(movieId),
   ];
 }
 
