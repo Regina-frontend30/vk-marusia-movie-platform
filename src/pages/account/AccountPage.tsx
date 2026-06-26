@@ -42,6 +42,22 @@ function getUserInitials(currentUser: AccountPageUser) {
     .toUpperCase();
 }
 
+function getAccountTabClassName(isActive: boolean) {
+  return `account__tab ${isActive ? "account__tab--active" : ""}`;
+}
+
+function AccountTabLabels({
+  mobileLabel,
+  desktopLabel,
+}: Pick<AccountTabButtonProps, "mobileLabel" | "desktopLabel">) {
+  return (
+    <>
+      <span className="account__tab-text account__tab-text--mobile">{mobileLabel}</span>
+      <span className="account__tab-text account__tab-text--desktop">{desktopLabel}</span>
+    </>
+  );
+}
+
 function AccountTabButton({
   activeTab,
   value,
@@ -52,14 +68,13 @@ function AccountTabButton({
 }: AccountTabButtonProps) {
   return (
     <button
-      className={`account__tab ${activeTab === value ? "account__tab--active" : ""}`}
+      className={getAccountTabClassName(activeTab === value)}
       onClick={() => setActiveTab(value)}
     >
       <svg className="account__tab-icon" aria-hidden="true">
         <use href={`${spriteUrl}#${iconId}`} />
       </svg>
-      <span className="account__tab-text account__tab-text--mobile">{mobileLabel}</span>
-      <span className="account__tab-text account__tab-text--desktop">{desktopLabel}</span>
+      <AccountTabLabels mobileLabel={mobileLabel} desktopLabel={desktopLabel} />
     </button>
   );
 }
@@ -166,11 +181,27 @@ function AccountFavorites({
 
   return (
     <div className="account__movies">
-      {favorites.map((favoriteMovie) => (
-        <FavoriteMovieCard key={favoriteMovie.id} favoriteMovie={favoriteMovie} removingFavoriteId={removingFavoriteId} removeFavorite={removeFavorite} />
-      ))}
+      <AccountFavoriteMovieList
+        favorites={favorites}
+        removingFavoriteId={removingFavoriteId}
+        removeFavorite={removeFavorite}
+      />
     </div>
   );
+}
+
+function AccountFavoriteMovieList({
+  favorites,
+  removingFavoriteId,
+  removeFavorite,
+}: {
+  favorites: AccountPageUser["favorites"];
+  removingFavoriteId: number | null;
+  removeFavorite: AccountPageController["removeFavorite"];
+}) {
+  return favorites.map((favoriteMovie) => (
+    <FavoriteMovieCard key={favoriteMovie.id} favoriteMovie={favoriteMovie} removingFavoriteId={removingFavoriteId} removeFavorite={removeFavorite} />
+  ));
 }
 
 function AccountPageContent({
