@@ -205,30 +205,41 @@ function SearchDropdownPanel(props: SearchDropdownProps) {
   );
 }
 
-function HeaderSearch({
-  searchQuery,
-  searchLoading,
-  searchWrapRef,
-  visibleResults,
-  searchOpen,
-  onChangeSearch,
-  onFocusSearch,
-  clearSearch,
-  closeDropdown,
-  isMobileSearchOpen,
-  closeMobileSearch,
-}: HeaderSearchProps) {
-  const handleSelectMovie = () => {
-    closeDropdown();
-    closeMobileSearch();
-  };
-
+function HeaderSearchIcon() {
   return (
-    <div className={`header__search-wrap ${isMobileSearchOpen ? "header__search-wrap--mobile-open" : ""}`} ref={searchWrapRef}>
-      <span className="header__search-icon" aria-hidden="true"><svg><use href={`${spriteUrl}#icon-search`} /></svg></span>
+    <span className="header__search-icon" aria-hidden="true"><svg><use href={`${spriteUrl}#icon-search`} /></svg></span>
+  );
+}
+
+function getHeaderSearchWrapClassName(isMobileSearchOpen: boolean) {
+  return `header__search-wrap ${isMobileSearchOpen ? "header__search-wrap--mobile-open" : ""}`;
+}
+
+function handleHeaderMovieSelect(args: Pick<HeaderSearchProps, "closeDropdown" | "closeMobileSearch">) {
+  args.closeDropdown();
+  args.closeMobileSearch();
+}
+
+function HeaderSearchResults({
+  searchLoading,
+  visibleResults,
+  closeDropdown,
+  closeMobileSearch,
+}: Pick<HeaderSearchProps, "searchLoading" | "visibleResults" | "closeDropdown" | "closeMobileSearch">) {
+  return (
+    <SearchDropdownPanel searchLoading={searchLoading} visibleResults={visibleResults} onSelect={() => handleHeaderMovieSelect({ closeDropdown, closeMobileSearch })} />
+  );
+}
+
+function HeaderSearch({
+  searchQuery, searchLoading, searchWrapRef, visibleResults, searchOpen, onChangeSearch, onFocusSearch, clearSearch, closeDropdown, isMobileSearchOpen, closeMobileSearch,
+}: HeaderSearchProps) {
+  return (
+    <div className={getHeaderSearchWrapClassName(isMobileSearchOpen)} ref={searchWrapRef}>
+      <HeaderSearchIcon />
       <SearchInput searchQuery={searchQuery} onChangeSearch={onChangeSearch} onFocusSearch={onFocusSearch} />
       <SearchClearButton searchQuery={searchQuery} isMobileSearchOpen={isMobileSearchOpen} clearSearch={clearSearch} closeMobileSearch={closeMobileSearch} />
-      {searchOpen ? <SearchDropdownPanel searchLoading={searchLoading} visibleResults={visibleResults} onSelect={handleSelectMovie} /> : null}
+      {searchOpen ? <HeaderSearchResults searchLoading={searchLoading} visibleResults={visibleResults} closeDropdown={closeDropdown} closeMobileSearch={closeMobileSearch} /> : null}
     </div>
   );
 }

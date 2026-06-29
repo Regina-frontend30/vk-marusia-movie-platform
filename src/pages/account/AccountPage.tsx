@@ -125,6 +125,25 @@ function AccountEmailRow({ email }: { email: string }) {
   );
 }
 
+function AccountSettingsInfo({
+  displayName,
+  email,
+  userInitials,
+}: {
+  displayName: string;
+  email: string;
+  userInitials: string;
+}) {
+  return (
+    <div className="account__user">
+      <div className="account__info">
+        <AccountNameRow displayName={displayName} userInitials={userInitials} />
+        <AccountEmailRow email={email} />
+      </div>
+    </div>
+  );
+}
+
 function AccountSettings({
   displayName,
   email,
@@ -138,12 +157,7 @@ function AccountSettings({
 }) {
   return (
     <div className="account__settings">
-      <div className="account__user">
-        <div className="account__info">
-          <AccountNameRow displayName={displayName} userInitials={userInitials} />
-          <AccountEmailRow email={email} />
-        </div>
-      </div>
+      <AccountSettingsInfo displayName={displayName} email={email} userInitials={userInitials} />
       <button className="account__logout" onClick={logout}>Выйти из аккаунта</button>
     </div>
   );
