@@ -6,8 +6,26 @@ type Props = {
   movies: Movie[];
 };
 
+function TopMovieCard({
+  movie,
+  position,
+  onOpenMovie,
+}: {
+  movie: Movie;
+  position: number;
+  onOpenMovie: (movieId: number) => void;
+}) {
+  return (
+    <div className="movie-card" onClick={() => onOpenMovie(movie.id)}>
+      <span className="movie-card__position">{position}</span>
+      <img className="movie-card__image" src={movie.posterUrl} alt={movie.title} />
+    </div>
+  );
+}
+
 export default function TopMovies({ movies }: Props) {
   const navigate = useNavigate();
+  const openMovie = (movieId: number) => navigate(`/movie/${movieId}`);
 
   return (
     <section className="top-movies container">
@@ -15,19 +33,7 @@ export default function TopMovies({ movies }: Props) {
 
       <div className="top-movies__list">
         {movies.map((movie, index) => (
-          <div
-            key={movie.id}
-            className="movie-card"
-            onClick={() => navigate(`/movie/${movie.id}`)}
-          >
-            <span className="movie-card__position">{index + 1}</span>
-
-            <img
-              className="movie-card__image"
-              src={movie.posterUrl}
-              alt={movie.title}
-            />
-          </div>
+          <TopMovieCard key={movie.id} movie={movie} position={index + 1} onOpenMovie={openMovie} />
         ))}
       </div>
     </section>

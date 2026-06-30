@@ -4,27 +4,47 @@ import TopMovies from "../../widgets/top-movies/TopMovies";
 import { getRandomMovie, getTopMovies } from "../../shared/api/movies";
 import type { Movie } from "../../shared/types/movie";
 
+async function loadFeaturedMovie(setFeaturedMovie: (movie: Movie) => void) {
+  try {
+    const randomMovie = await getRandomMovie();
+    setFeaturedMovie(randomMovie);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+async function loadTopMoviesList(setTopMovies: (movies: Movie[]) => void) {
+  try {
+    const topMoviesList = await getTopMovies();
+    setTopMovies(topMoviesList);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+function HomePageContent({
+  featuredMovie,
+  topMovies,
+  onRefresh,
+}: {
+  featuredMovie: Movie;
+  topMovies: Movie[];
+  onRefresh: () => Promise<void>;
+}) {
+  return (
+    <>
+      <Hero movie={featuredMovie} onRefresh={onRefresh} />
+      <TopMovies movies={topMovies} />
+    </>
+  );
+}
+
 export default function HomePage() {
   const [featuredMovie, setFeaturedMovie] = useState<Movie | null>(null);
   const [topMovies, setTopMovies] = useState<Movie[]>([]);
 
-  const loadRandomMovie = async () => {
-    try {
-      const randomMovie = await getRandomMovie();
-      setFeaturedMovie(randomMovie);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const loadTopMovies = async () => {
-    try {
-      const topMoviesList = await getTopMovies();
-      setTopMovies(topMoviesList);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  const loadRandomMovie = () => loadFeaturedMovie(setFeaturedMovie);
+  const loadTopMovies = () => loadTopMoviesList(setTopMovies);
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -35,10 +55,5 @@ export default function HomePage() {
 
   if (!featuredMovie) return <div>Загрузка...</div>;
 
-  return (
-    <>
-      <Hero movie={featuredMovie} onRefresh={loadRandomMovie} />
-      <TopMovies movies={topMovies} />
-    </>
-  );
+  return <HomePageContent featuredMovie={featuredMovie} topMovies={topMovies} onRefresh={loadRandomMovie} />;
 }
