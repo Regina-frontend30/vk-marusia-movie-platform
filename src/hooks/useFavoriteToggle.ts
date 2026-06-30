@@ -102,35 +102,31 @@ async function updateFavoriteMovie(args: {
   await args.refreshUser();
 }
 
-async function toggleFavoriteMovie({
-  user,
-  movieId,
-  loading,
-  isFavorite,
-  refreshUser,
-  setLoading,
-  setIsAuthOpen,
-}: ToggleFavoriteArgs) {
-  if (!user) {
-    setIsAuthOpen(true);
-    return;
+function shouldOpenFavoriteAuth(args: Pick<ToggleFavoriteArgs, "user" | "setIsAuthOpen">) {
+  if (args.user) {
+    return false;
   }
 
-  if (movieId === null || loading) {
-    return;
-  }
+  args.setIsAuthOpen(true);
+  return true;
+}
+
+async function toggleFavoriteMovie(args: ToggleFavoriteArgs) {
+  const movieId = args.movieId;
+  if (shouldOpenFavoriteAuth(args)) return;
+  if (movieId === null || args.loading) return;
 
   try {
-    setLoading(true);
+    args.setLoading(true);
     await updateFavoriteMovie({
       movieId,
-      isFavorite,
-      refreshUser,
+      isFavorite: args.isFavorite,
+      refreshUser: args.refreshUser,
     });
   } catch (error) {
     console.error(error);
   } finally {
-    setLoading(false);
+    args.setLoading(false);
   }
 }
 
