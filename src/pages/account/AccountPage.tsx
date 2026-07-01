@@ -180,28 +180,14 @@ function FavoriteMovieCard({
   );
 }
 
-function AccountFavorites({
-  favorites,
-  removingFavoriteId,
-  removeFavorite,
-}: {
-  favorites: AccountPageUser["favorites"];
-  removingFavoriteId: number | null;
-  removeFavorite: AccountPageController["removeFavorite"];
+function AccountFavorites({ favorites, removingFavoriteId, removeFavorite }: {
+  favorites: AccountPageUser["favorites"]; removingFavoriteId: number | null; removeFavorite: AccountPageController["removeFavorite"];
 }) {
   if (favorites.length === 0) {
-    return <div className="account__empty">Нет избранных фильмов</div>;
+    return <AccountEmptyFavorites />;
   }
 
-  return (
-    <div className="account__movies">
-      <AccountFavoriteMovieList
-        favorites={favorites}
-        removingFavoriteId={removingFavoriteId}
-        removeFavorite={removeFavorite}
-      />
-    </div>
-  );
+  return <div className="account__movies"><AccountFavoriteMovieList favorites={favorites} removingFavoriteId={removingFavoriteId} removeFavorite={removeFavorite} /></div>;
 }
 
 function AccountFavoriteMovieList({
@@ -216,6 +202,10 @@ function AccountFavoriteMovieList({
   return favorites.map((favoriteMovie) => (
     <FavoriteMovieCard key={favoriteMovie.id} favoriteMovie={favoriteMovie} removingFavoriteId={removingFavoriteId} removeFavorite={removeFavorite} />
   ));
+}
+
+function AccountEmptyFavorites() {
+  return <div className="account__empty">Нет избранных фильмов</div>;
 }
 
 function AccountPageContent({
