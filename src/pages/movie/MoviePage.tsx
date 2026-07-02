@@ -9,132 +9,159 @@ import { useFavoriteToggle } from "../../hooks/useFavoriteToggle";
 
 const BASE_URL = "https://cinemaguide.skillbox.cc";
 
-export default function MoviePage() {
-  const { id } = useParams<{ id: string }>();
+async function loadMovieDetailsData(id: string | undefined) {
+  const response = await fetch(`${BASE_URL}/movie/${id}`);
+  return response.json();
+}
 
+function MoviePageLoader() {
+  return <div className="container">Загрузка...</div>;
+}
+
+function MoviePageNotFound() {
+  return <div className="container">Фильм не найден</div>;
+}
+
+function MoviePageMeta({ movieDetails }: { movieDetails: Movie }) {
+  return (
+    <div className="movie-page__meta">
+      <span className="movie-page__rating">★ {movieDetails.tmdbRating}</span>
+      <span className="movie-page__year">{movieDetails.releaseYear}</span>
+      <span className="movie-page__genres">{movieDetails.genres?.[0]}</span>
+      <span className="movie-page__runtime">{movieDetails.runtime} мин</span>
+    </div>
+  );
+}
+
+function MoviePageFavoriteButton({
+  favoriteController,
+}: {
+  favoriteController: ReturnType<typeof useFavoriteToggle>;
+}) {
+  return (
+    <button type="button" className={`movie-page__icon-btn ${favoriteController.isFavorite ? "movie-page__icon-btn--active" : ""}`} disabled={favoriteController.disabled} onClick={favoriteController.toggleFavorite}>
+      <svg className="movie-page__icon">
+        <use href={`${spriteUrl}#${favoriteController.isFavorite ? "icon-favorites-filled" : "icon-favorites"}`} />
+      </svg>
+    </button>
+  );
+}
+
+function MoviePageActions({
+  hasTrailer,
+  favoriteController,
+  onOpenTrailer,
+}: {
+  hasTrailer: boolean;
+  favoriteController: ReturnType<typeof useFavoriteToggle>;
+  onOpenTrailer: () => void;
+}) {
+  return (
+    <div className="movie-page__actions">
+      <button type="button" className="movie-page__button movie-page__button--primary" onClick={onOpenTrailer} disabled={!hasTrailer}>Трейлер</button>
+      <MoviePageFavoriteButton favoriteController={favoriteController} />
+    </div>
+  );
+}
+
+function MoviePageAbout({ movieDetails }: { movieDetails: Movie }) {
+  return (
+    <div className="movie-page__about">
+      <h2 className="movie-page__about-title">О фильме</h2>
+      <div className="movie-page__about-rows">
+        <div className="movie-page__about-row"><span>Год</span><span>{movieDetails.releaseYear}</span></div>
+        <div className="movie-page__about-row"><span>Жанр</span><span>{movieDetails.genres?.join(", ")}</span></div>
+        <div className="movie-page__about-row"><span>Длительность</span><span>{movieDetails.runtime} мин</span></div>
+      </div>
+    </div>
+  );
+}
+
+function MoviePageContent({
+  movieDetails,
+  hasTrailer,
+  favoriteController,
+  onOpenTrailer,
+}: {
+  movieDetails: Movie;
+  hasTrailer: boolean;
+  favoriteController: ReturnType<typeof useFavoriteToggle>;
+  onOpenTrailer: () => void;
+}) {
+  return (
+    <section className="movie-page container">
+      <div className="movie-page__hero">
+        <div className="movie-page__info">
+          <MoviePageMeta movieDetails={movieDetails} />
+          <h1 className="movie-page__title">{movieDetails.title}</h1>
+          <p className="movie-page__plot">{movieDetails.plot}</p>
+          <MoviePageActions hasTrailer={hasTrailer} favoriteController={favoriteController} onOpenTrailer={onOpenTrailer} />
+        </div>
+        <img className="movie-page__image" src={movieDetails.backdropUrl} alt={movieDetails.title} />
+      </div>
+      <MoviePageAbout movieDetails={movieDetails} />
+    </section>
+  );
+}
+
+function MoviePageTrailerModal({
+  isOpen,
+  hasTrailer,
+  movieDetails,
+  onClose,
+}: {
+  isOpen: boolean;
+  hasTrailer: boolean;
+  movieDetails: Movie;
+  onClose: () => void;
+}) {
+  if (!isOpen || !hasTrailer) {
+    return null;
+  }
+
+  return <TrailerModal title={movieDetails.title} trailerUrl={movieDetails.trailerUrl} trailerYouTubeId={movieDetails.trailerYouTubeId} onClose={onClose} />;
+}
+
+function useMoviePageData() {
+  const { id } = useParams<{ id: string }>();
   const [movieDetails, setMovieDetails] = useState<Movie | null>(null);
   const [isTrailerOpen, setIsTrailerOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  const favoriteController = useFavoriteToggle(movieDetails?.id ?? null);
 
   useEffect(() => {
-    const loadMovieDetails = async () => {
+    async function loadMovieDetails() {
       try {
-        const response = await fetch(`${BASE_URL}/movie/${id}`);
-        const movieData = await response.json();
-        setMovieDetails(movieData);
+        setMovieDetails(await loadMovieDetailsData(id));
       } catch (error) {
         console.error(error);
       } finally {
         setLoading(false);
       }
-    };
+    }
 
-    loadMovieDetails();
+    void loadMovieDetails();
   }, [id]);
 
-  if (loading) {
-    return <div className="container">Загрузка...</div>;
-  }
+  return { loading, movieDetails, isTrailerOpen, setIsTrailerOpen };
+}
 
-  if (!movieDetails) {
-    return <div className="container">Фильм не найден</div>;
-  }
-
-  const hasTrailer = Boolean(
-    movieDetails.trailerYouTubeId || movieDetails.trailerUrl
-  );
+function MoviePageLoaded({ movieDetails }: { movieDetails: Movie }) {
+  const [isTrailerOpen, setIsTrailerOpen] = useState(false);
+  const favoriteController = useFavoriteToggle(movieDetails.id);
+  const hasTrailer = Boolean(movieDetails.trailerYouTubeId || movieDetails.trailerUrl);
 
   return (
     <>
-      <section className="movie-page container">
-        <div className="movie-page__hero">
-          <div className="movie-page__info">
-            <div className="movie-page__meta">
-              <span className="movie-page__rating">★ {movieDetails.tmdbRating}</span>
-              <span className="movie-page__year">{movieDetails.releaseYear}</span>
-              <span className="movie-page__genres">{movieDetails.genres?.[0]}</span>
-              <span className="movie-page__runtime">{movieDetails.runtime} мин</span>
-            </div>
-
-            <h1 className="movie-page__title">{movieDetails.title}</h1>
-
-            <p className="movie-page__plot">{movieDetails.plot}</p>
-
-            <div className="movie-page__actions">
-              <button
-                type="button"
-                className="movie-page__button movie-page__button--primary"
-                onClick={() => setIsTrailerOpen(true)}
-                disabled={!hasTrailer}
-              >
-                Трейлер
-              </button>
-
-              <button
-                type="button"
-                className={`movie-page__icon-btn ${
-                  favoriteController.isFavorite
-                    ? "movie-page__icon-btn--active"
-                    : ""
-                }`}
-                disabled={favoriteController.disabled}
-                onClick={favoriteController.toggleFavorite}
-              >
-                <svg className="movie-page__icon">
-                  <use
-                    href={`${spriteUrl}#${
-                      favoriteController.isFavorite
-                        ? "icon-favorites-filled"
-                        : "icon-favorites"
-                    }`}
-                  />
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          <img
-            className="movie-page__image"
-            src={movieDetails.backdropUrl}
-            alt={movieDetails.title}
-          />
-        </div>
-
-        <div className="movie-page__about">
-          <h2 className="movie-page__about-title">О фильме</h2>
-
-          <div className="movie-page__about-rows">
-            <div className="movie-page__about-row">
-              <span>Год</span>
-              <span>{movieDetails.releaseYear}</span>
-            </div>
-
-            <div className="movie-page__about-row">
-              <span>Жанр</span>
-              <span>{movieDetails.genres?.join(", ")}</span>
-            </div>
-
-            <div className="movie-page__about-row">
-              <span>Длительность</span>
-              <span>{movieDetails.runtime} мин</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {isTrailerOpen && hasTrailer ? (
-        <TrailerModal
-          title={movieDetails.title}
-          trailerUrl={movieDetails.trailerUrl}
-          trailerYouTubeId={movieDetails.trailerYouTubeId}
-          onClose={() => setIsTrailerOpen(false)}
-        />
-      ) : null}
-
-      {favoriteController.isAuthOpen ? (
-        <AuthModal onClose={favoriteController.closeAuth} />
-      ) : null}
+      <MoviePageContent movieDetails={movieDetails} hasTrailer={hasTrailer} favoriteController={favoriteController} onOpenTrailer={() => setIsTrailerOpen(true)} />
+      <MoviePageTrailerModal isOpen={isTrailerOpen} hasTrailer={hasTrailer} movieDetails={movieDetails} onClose={() => setIsTrailerOpen(false)} />
+      {favoriteController.isAuthOpen ? <AuthModal onClose={favoriteController.closeAuth} /> : null}
     </>
   );
+}
+
+export default function MoviePage() {
+  const { loading, movieDetails } = useMoviePageData();
+  if (loading) return <MoviePageLoader />;
+  if (!movieDetails) return <MoviePageNotFound />;
+  return <MoviePageLoaded movieDetails={movieDetails} />;
 }

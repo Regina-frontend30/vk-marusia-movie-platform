@@ -12,99 +12,125 @@ type Props = {
   onRefresh: () => void;
 };
 
-export default function Hero({ movie, onRefresh }: Props) {
-  const navigate = useNavigate();
-  const [isTrailerOpen, setIsTrailerOpen] = useState(false);
-  const favoriteController = useFavoriteToggle(movie.id);
-  const hasTrailer = Boolean(
-    movie.trailerYouTubeId || movie.trailerUrl
-  );
+function formatRuntime(minutes: number) {
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+  return `${hours ? hours + " ч " : ""}${remainingMinutes} мин`;
+}
 
-  function formatRuntime(minutes: number) {
-    const hours = Math.floor(minutes / 60);
-    const remainingMinutes = minutes % 60;
-    return `${hours ? hours + " ч " : ""}${remainingMinutes} мин`;
+function getFavoriteIconId(isFavorite: boolean) {
+  return isFavorite ? "icon-favorites-filled" : "icon-favorites";
+}
+
+function getFavoriteLabel(isFavorite: boolean) {
+  return isFavorite ? "Убрать из избранного" : "В избранное";
+}
+
+function HeroMeta({ movie }: Pick<Props, "movie">) {
+  return (
+    <div className="hero__meta">
+      <span className="hero__rating">★ {movie.tmdbRating?.toFixed(1) || "—"}</span>
+      <span className="hero__year">{movie.releaseYear}</span>
+      <span className="hero__genres">{movie.genres?.[0] || "—"}</span>
+      <span className="hero__runtime">{formatRuntime(movie.runtime)}</span>
+    </div>
+  );
+}
+
+function HeroFavoriteButton({
+  isFavorite,
+  disabled,
+  onClick,
+}: {
+  isFavorite: boolean;
+  disabled: boolean;
+  onClick: () => Promise<void>;
+}) {
+  return (
+    <button type="button" className={`hero__icon-btn ${isFavorite ? "hero__icon-btn--active" : ""}`} aria-label={getFavoriteLabel(isFavorite)} disabled={disabled} onClick={onClick}>
+      <svg aria-hidden="true">
+        <use href={`${spriteUrl}#${getFavoriteIconId(isFavorite)}`} />
+      </svg>
+    </button>
+  );
+}
+
+function HeroActions({
+  hasTrailer,
+  favoriteController,
+  onOpenTrailer,
+  onOpenMovie,
+  onRefresh,
+}: {
+  hasTrailer: boolean;
+  favoriteController: ReturnType<typeof useFavoriteToggle>;
+  onOpenTrailer: () => void;
+  onOpenMovie: () => void;
+  onRefresh: () => void;
+}) {
+  return (
+    <div className="hero__actions">
+      <button type="button" className="hero__button hero__button--primary" onClick={onOpenTrailer} disabled={!hasTrailer}>Трейлер</button>
+      <button type="button" className="hero__button hero__button--secondary" onClick={onOpenMovie}>О фильме</button>
+      <div className="hero__icons">
+        <HeroFavoriteButton isFavorite={favoriteController.isFavorite} disabled={favoriteController.disabled} onClick={favoriteController.toggleFavorite} />
+        <button type="button" className="hero__icon-btn" aria-label="Обновить" onClick={onRefresh}>
+          <svg aria-hidden="true"><use href={`${spriteUrl}#icon-update`} /></svg>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function HeroTrailerModal({
+  isOpen,
+  hasTrailer,
+  movie,
+  onClose,
+}: {
+  isOpen: boolean;
+  hasTrailer: boolean;
+  movie: Movie;
+  onClose: () => void;
+}) {
+  if (!isOpen || !hasTrailer) {
+    return null;
   }
 
+  return <TrailerModal title={movie.title} trailerUrl={movie.trailerUrl} trailerYouTubeId={movie.trailerYouTubeId} onClose={onClose} />;
+}
+
+function useHeroController(movieId: number) {
+  const navigate = useNavigate();
+  const [isTrailerOpen, setIsTrailerOpen] = useState(false);
+  const favoriteController = useFavoriteToggle(movieId);
+
+  return {
+    favoriteController,
+    isTrailerOpen,
+    openTrailer: () => setIsTrailerOpen(true),
+    closeTrailer: () => setIsTrailerOpen(false),
+    openMovie: () => navigate(`/movie/${movieId}`),
+  };
+}
+
+function HeroContent({
+  movie,
+  onRefresh,
+  hasTrailer,
+  controller,
+}: Props & {
+  hasTrailer: boolean;
+  controller: ReturnType<typeof useHeroController>;
+}) {
   return (
     <section className="hero">
       <div className="hero__content container">
         <div className="hero__info">
-          <div className="hero__meta">
-            <span className="hero__rating">
-              ★ {movie.tmdbRating?.toFixed(1) || "—"}
-            </span>
-
-            <span className="hero__year">{movie.releaseYear}</span>
-
-            <span className="hero__genres">{movie.genres?.[0] || "—"}</span>
-
-            <span className="hero__runtime">
-              {formatRuntime(movie.runtime)}
-            </span>
-          </div>
-
+          <HeroMeta movie={movie} />
           <h1 className="hero__title">{movie.title}</h1>
-
           <p className="hero__description">{movie.plot}</p>
-
-          <div className="hero__actions">
-            <button
-              type="button"
-              className="hero__button hero__button--primary"
-              onClick={() => setIsTrailerOpen(true)}
-              disabled={!hasTrailer}
-            >
-              Трейлер
-            </button>
-
-            <button
-              type="button"
-              className="hero__button hero__button--secondary"
-              onClick={() => navigate(`/movie/${movie.id}`)}
-            >
-              О фильме
-            </button>
-
-            <div className="hero__icons">
-              <button
-                type="button"
-                className={`hero__icon-btn ${
-                  favoriteController.isFavorite
-                    ? "hero__icon-btn--active"
-                    : ""
-                }`}
-                aria-label={
-                  favoriteController.isFavorite
-                    ? "Убрать из избранного"
-                    : "В избранное"
-                }
-                disabled={favoriteController.disabled}
-                onClick={favoriteController.toggleFavorite}
-              >
-                <svg aria-hidden="true">
-                  <use
-                    href={`${spriteUrl}#${
-                      favoriteController.isFavorite
-                        ? "icon-favorites-filled"
-                        : "icon-favorites"
-                    }`}
-                  />
-                </svg>
-              </button>
-
-              <button
-                type="button"
-                className="hero__icon-btn"
-                aria-label="Обновить"
-                onClick={onRefresh}
-              >
-                <svg aria-hidden="true">
-                  <use href={`${spriteUrl}#icon-update`} />
-                </svg>
-              </button>
-            </div>
-          </div>
+          <HeroActions hasTrailer={hasTrailer} favoriteController={controller.favoriteController} onOpenTrailer={controller.openTrailer} onOpenMovie={controller.openMovie} onRefresh={onRefresh} />
         </div>
 
         <img
@@ -114,18 +140,17 @@ export default function Hero({ movie, onRefresh }: Props) {
         />
       </div>
 
-      {isTrailerOpen && hasTrailer ? (
-        <TrailerModal
-          title={movie.title}
-          trailerUrl={movie.trailerUrl}
-          trailerYouTubeId={movie.trailerYouTubeId}
-          onClose={() => setIsTrailerOpen(false)}
-        />
-      ) : null}
+      <HeroTrailerModal isOpen={controller.isTrailerOpen} hasTrailer={hasTrailer} movie={movie} onClose={controller.closeTrailer} />
 
-      {favoriteController.isAuthOpen ? (
-        <AuthModal onClose={favoriteController.closeAuth} />
+      {controller.favoriteController.isAuthOpen ? (
+        <AuthModal onClose={controller.favoriteController.closeAuth} />
       ) : null}
     </section>
   );
+}
+
+export default function Hero({ movie, onRefresh }: Props) {
+  const controller = useHeroController(movie.id);
+  const hasTrailer = Boolean(movie.trailerYouTubeId || movie.trailerUrl);
+  return <HeroContent movie={movie} onRefresh={onRefresh} hasTrailer={hasTrailer} controller={controller} />;
 }
