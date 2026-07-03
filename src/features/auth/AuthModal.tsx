@@ -51,12 +51,7 @@ function AuthModalEmailField({
   );
 }
 
-function AuthModalRegisterFields({
-  mode,
-  submitted,
-  formValues,
-  setFormField,
-}: Pick<ReturnType<typeof useAuthModal>, "mode" | "submitted" | "formValues" | "setFormField">) {
+function AuthModalRegisterFields({ mode, submitted, formValues, setFormField }: Pick<ReturnType<typeof useAuthModal>, "mode" | "submitted" | "formValues" | "setFormField">) {
   if (mode !== "register") {
     return null;
   }
