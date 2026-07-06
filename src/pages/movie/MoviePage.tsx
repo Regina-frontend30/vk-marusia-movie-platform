@@ -9,9 +9,28 @@ import { useFavoriteToggle } from "../../hooks/useFavoriteToggle";
 
 const BASE_URL = "https://cinemaguide.skillbox.cc";
 
+type MoviePageData = {
+  loading: boolean;
+  movieDetails: Movie | null;
+};
+
 async function loadMovieDetailsData(id: string | undefined) {
   const response = await fetch(`${BASE_URL}/movie/${id}`);
   return response.json();
+}
+
+async function loadMoviePageState(args: {
+  id: string | undefined;
+  setMovieDetails: React.Dispatch<React.SetStateAction<Movie | null>>;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
+  try {
+    args.setMovieDetails(await loadMovieDetailsData(args.id));
+  } catch (error) {
+    console.error(error);
+  } finally {
+    args.setLoading(false);
+  }
 }
 
 function MoviePageLoader() {
@@ -122,27 +141,16 @@ function MoviePageTrailerModal({
   return <TrailerModal title={movieDetails.title} trailerUrl={movieDetails.trailerUrl} trailerYouTubeId={movieDetails.trailerYouTubeId} onClose={onClose} />;
 }
 
-function useMoviePageData() {
+function useMoviePageData(): MoviePageData {
   const { id } = useParams<{ id: string }>();
   const [movieDetails, setMovieDetails] = useState<Movie | null>(null);
-  const [isTrailerOpen, setIsTrailerOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function loadMovieDetails() {
-      try {
-        setMovieDetails(await loadMovieDetailsData(id));
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    void loadMovieDetails();
+    void loadMoviePageState({ id, setMovieDetails, setLoading });
   }, [id]);
 
-  return { loading, movieDetails, isTrailerOpen, setIsTrailerOpen };
+  return { loading, movieDetails };
 }
 
 function MoviePageLoaded({ movieDetails }: { movieDetails: Movie }) {

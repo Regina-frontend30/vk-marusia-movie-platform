@@ -12,6 +12,16 @@ type Props = {
   onRefresh: () => void;
 };
 
+type HeroController = ReturnType<typeof useHeroController>;
+
+type HeroActionsProps = {
+  hasTrailer: boolean;
+  favoriteController: ReturnType<typeof useFavoriteToggle>;
+  onOpenTrailer: () => void;
+  onOpenMovie: () => void;
+  onRefresh: () => void;
+};
+
 function formatRuntime(minutes: number) {
   const hours = Math.floor(minutes / 60);
   const remainingMinutes = minutes % 60;
@@ -55,28 +65,28 @@ function HeroFavoriteButton({
   );
 }
 
+function HeroRefreshButton({ onRefresh }: Pick<HeroActionsProps, "onRefresh">) {
+  return (
+    <button type="button" className="hero__icon-btn" aria-label="Обновить" onClick={onRefresh}>
+      <svg aria-hidden="true"><use href={`${spriteUrl}#icon-update`} /></svg>
+    </button>
+  );
+}
+
 function HeroActions({
   hasTrailer,
   favoriteController,
   onOpenTrailer,
   onOpenMovie,
   onRefresh,
-}: {
-  hasTrailer: boolean;
-  favoriteController: ReturnType<typeof useFavoriteToggle>;
-  onOpenTrailer: () => void;
-  onOpenMovie: () => void;
-  onRefresh: () => void;
-}) {
+}: HeroActionsProps) {
   return (
     <div className="hero__actions">
       <button type="button" className="hero__button hero__button--primary" onClick={onOpenTrailer} disabled={!hasTrailer}>Трейлер</button>
       <button type="button" className="hero__button hero__button--secondary" onClick={onOpenMovie}>О фильме</button>
       <div className="hero__icons">
         <HeroFavoriteButton isFavorite={favoriteController.isFavorite} disabled={favoriteController.disabled} onClick={favoriteController.toggleFavorite} />
-        <button type="button" className="hero__icon-btn" aria-label="Обновить" onClick={onRefresh}>
-          <svg aria-hidden="true"><use href={`${spriteUrl}#icon-update`} /></svg>
-        </button>
+        <HeroRefreshButton onRefresh={onRefresh} />
       </div>
     </div>
   );
@@ -121,7 +131,7 @@ function HeroContent({
   controller,
 }: Props & {
   hasTrailer: boolean;
-  controller: ReturnType<typeof useHeroController>;
+  controller: HeroController;
 }) {
   return (
     <section className="hero">
