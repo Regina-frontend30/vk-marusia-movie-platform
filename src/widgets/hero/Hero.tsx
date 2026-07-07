@@ -14,6 +14,11 @@ type Props = {
 
 type HeroController = ReturnType<typeof useHeroController>;
 
+type HeroContentProps = Props & {
+  hasTrailer: boolean;
+  controller: HeroController;
+};
+
 type HeroActionsProps = {
   hasTrailer: boolean;
   favoriteController: ReturnType<typeof useFavoriteToggle>;
@@ -124,37 +129,44 @@ function useHeroController(movieId: number) {
   };
 }
 
-function HeroContent({
-  movie,
-  onRefresh,
-  hasTrailer,
-  controller,
-}: Props & {
-  hasTrailer: boolean;
-  controller: HeroController;
-}) {
+function HeroInfo({ movie, onRefresh, hasTrailer, controller }: HeroContentProps) {
+  return (
+    <div className="hero__info">
+      <HeroMeta movie={movie} />
+      <h1 className="hero__title">{movie.title}</h1>
+      <p className="hero__description">{movie.plot}</p>
+      <HeroActions hasTrailer={hasTrailer} favoriteController={controller.favoriteController} onOpenTrailer={controller.openTrailer} onOpenMovie={controller.openMovie} onRefresh={onRefresh} />
+    </div>
+  );
+}
+
+function HeroImage({ movie }: Pick<HeroContentProps, "movie">) {
+  return <img className="hero__image" src={movie.backdropUrl} alt={movie.title} />;
+}
+
+function HeroContentLayout(props: HeroContentProps) {
+  return (
+    <div className="hero__content container">
+      <HeroInfo {...props} />
+      <HeroImage movie={props.movie} />
+    </div>
+  );
+}
+
+function HeroOverlays({ movie, hasTrailer, controller }: Pick<HeroContentProps, "movie" | "hasTrailer" | "controller">) {
+  return (
+    <>
+      <HeroTrailerModal isOpen={controller.isTrailerOpen} hasTrailer={hasTrailer} movie={movie} onClose={controller.closeTrailer} />
+      {controller.favoriteController.isAuthOpen ? <AuthModal onClose={controller.favoriteController.closeAuth} /> : null}
+    </>
+  );
+}
+
+function HeroContent(props: HeroContentProps) {
   return (
     <section className="hero">
-      <div className="hero__content container">
-        <div className="hero__info">
-          <HeroMeta movie={movie} />
-          <h1 className="hero__title">{movie.title}</h1>
-          <p className="hero__description">{movie.plot}</p>
-          <HeroActions hasTrailer={hasTrailer} favoriteController={controller.favoriteController} onOpenTrailer={controller.openTrailer} onOpenMovie={controller.openMovie} onRefresh={onRefresh} />
-        </div>
-
-        <img
-          className="hero__image"
-          src={movie.backdropUrl}
-          alt={movie.title}
-        />
-      </div>
-
-      <HeroTrailerModal isOpen={controller.isTrailerOpen} hasTrailer={hasTrailer} movie={movie} onClose={controller.closeTrailer} />
-
-      {controller.favoriteController.isAuthOpen ? (
-        <AuthModal onClose={controller.favoriteController.closeAuth} />
-      ) : null}
+      <HeroContentLayout {...props} />
+      <HeroOverlays movie={props.movie} hasTrailer={props.hasTrailer} controller={props.controller} />
     </section>
   );
 }

@@ -96,29 +96,47 @@ function MoviePageAbout({ movieDetails }: { movieDetails: Movie }) {
   );
 }
 
-function MoviePageContent({
-  movieDetails,
-  hasTrailer,
-  favoriteController,
-  onOpenTrailer,
-}: {
+type MoviePageContentProps = {
   movieDetails: Movie;
   hasTrailer: boolean;
   favoriteController: ReturnType<typeof useFavoriteToggle>;
   onOpenTrailer: () => void;
-}) {
+};
+
+function MoviePageHeroInfo({
+  movieDetails,
+  hasTrailer,
+  favoriteController,
+  onOpenTrailer,
+}: MoviePageContentProps) {
+  return (
+    <div className="movie-page__info">
+      <MoviePageMeta movieDetails={movieDetails} />
+      <h1 className="movie-page__title">{movieDetails.title}</h1>
+      <p className="movie-page__plot">{movieDetails.plot}</p>
+      <MoviePageActions hasTrailer={hasTrailer} favoriteController={favoriteController} onOpenTrailer={onOpenTrailer} />
+    </div>
+  );
+}
+
+function MoviePageHeroImage({ movieDetails }: { movieDetails: Movie }) {
+  return <img className="movie-page__image" src={movieDetails.backdropUrl} alt={movieDetails.title} />;
+}
+
+function MoviePageHero(props: MoviePageContentProps) {
+  return (
+    <div className="movie-page__hero">
+      <MoviePageHeroInfo {...props} />
+      <MoviePageHeroImage movieDetails={props.movieDetails} />
+    </div>
+  );
+}
+
+function MoviePageContent(props: MoviePageContentProps) {
   return (
     <section className="movie-page container">
-      <div className="movie-page__hero">
-        <div className="movie-page__info">
-          <MoviePageMeta movieDetails={movieDetails} />
-          <h1 className="movie-page__title">{movieDetails.title}</h1>
-          <p className="movie-page__plot">{movieDetails.plot}</p>
-          <MoviePageActions hasTrailer={hasTrailer} favoriteController={favoriteController} onOpenTrailer={onOpenTrailer} />
-        </div>
-        <img className="movie-page__image" src={movieDetails.backdropUrl} alt={movieDetails.title} />
-      </div>
-      <MoviePageAbout movieDetails={movieDetails} />
+      <MoviePageHero {...props} />
+      <MoviePageAbout movieDetails={props.movieDetails} />
     </section>
   );
 }
