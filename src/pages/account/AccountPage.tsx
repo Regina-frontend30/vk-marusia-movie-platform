@@ -28,6 +28,12 @@ type FavoriteMovieCardProps = {
   removeFavorite: AccountPageController["removeFavorite"];
 };
 
+type AccountFavoritesProps = {
+  favorites: AccountPageUser["favorites"];
+  removingFavoriteId: number | null;
+  removeFavorite: AccountPageController["removeFavorite"];
+};
+
 function getUserInitials(currentUser: AccountPageUser) {
   const initials =
     `${currentUser.firstName?.[0] ?? ""}${currentUser.lastName?.[0] ?? ""}`.trim();
@@ -180,25 +186,23 @@ function FavoriteMovieCard({
   );
 }
 
-function AccountFavorites({ favorites, removingFavoriteId, removeFavorite }: {
-  favorites: AccountPageUser["favorites"]; removingFavoriteId: number | null; removeFavorite: AccountPageController["removeFavorite"];
-}) {
-  if (favorites.length === 0) {
+function AccountFavorites(props: AccountFavoritesProps) {
+  if (props.favorites.length === 0) {
     return <AccountEmptyFavorites />;
   }
 
-  return <div className="account__movies"><AccountFavoriteMovieList favorites={favorites} removingFavoriteId={removingFavoriteId} removeFavorite={removeFavorite} /></div>;
+  return (
+    <div className="account__movies">
+      <AccountFavoriteMovieList {...props} />
+    </div>
+  );
 }
 
 function AccountFavoriteMovieList({
   favorites,
   removingFavoriteId,
   removeFavorite,
-}: {
-  favorites: AccountPageUser["favorites"];
-  removingFavoriteId: number | null;
-  removeFavorite: AccountPageController["removeFavorite"];
-}) {
+}: AccountFavoritesProps) {
   return favorites.map((favoriteMovie) => (
     <FavoriteMovieCard key={favoriteMovie.id} favoriteMovie={favoriteMovie} removingFavoriteId={removingFavoriteId} removeFavorite={removeFavorite} />
   ));

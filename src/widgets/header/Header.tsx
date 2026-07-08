@@ -197,10 +197,10 @@ function SearchInput({
   );
 }
 
-function SearchDropdownPanel(props: SearchDropdownProps) {
+function SearchDropdownPanel(dropdownProps: SearchDropdownProps) {
   return (
     <div className="header__search-dropdown">
-      <SearchDropdown {...props} />
+      <SearchDropdown {...dropdownProps} />
     </div>
   );
 }
@@ -215,9 +215,12 @@ function getHeaderSearchWrapClassName(isMobileSearchOpen: boolean) {
   return `header__search-wrap ${isMobileSearchOpen ? "header__search-wrap--mobile-open" : ""}`;
 }
 
-function handleHeaderMovieSelect(args: Pick<HeaderSearchProps, "closeDropdown" | "closeMobileSearch">) {
-  args.closeDropdown();
-  args.closeMobileSearch();
+function handleSearchResultSelect({
+  closeDropdown,
+  closeMobileSearch,
+}: Pick<HeaderSearchProps, "closeDropdown" | "closeMobileSearch">) {
+  closeDropdown();
+  closeMobileSearch();
 }
 
 function HeaderSearchResults({
@@ -227,13 +230,24 @@ function HeaderSearchResults({
   closeMobileSearch,
 }: Pick<HeaderSearchProps, "searchLoading" | "visibleResults" | "closeDropdown" | "closeMobileSearch">) {
   return (
-    <SearchDropdownPanel searchLoading={searchLoading} visibleResults={visibleResults} onSelect={() => handleHeaderMovieSelect({ closeDropdown, closeMobileSearch })} />
+    <SearchDropdownPanel searchLoading={searchLoading} visibleResults={visibleResults} onSelect={() => handleSearchResultSelect({ closeDropdown, closeMobileSearch })} />
   );
 }
 
-function HeaderSearch({
-  searchQuery, searchLoading, searchWrapRef, visibleResults, searchOpen, onChangeSearch, onFocusSearch, clearSearch, closeDropdown, isMobileSearchOpen, closeMobileSearch,
-}: HeaderSearchProps) {
+function HeaderSearch(props: HeaderSearchProps) {
+  const {
+    searchQuery,
+    searchLoading,
+    searchWrapRef,
+    visibleResults,
+    searchOpen,
+    onChangeSearch,
+    onFocusSearch,
+    clearSearch,
+    closeDropdown,
+    isMobileSearchOpen,
+    closeMobileSearch,
+  } = props;
   return (
     <div className={getHeaderSearchWrapClassName(isMobileSearchOpen)} ref={searchWrapRef}>
       <HeaderSearchIcon />

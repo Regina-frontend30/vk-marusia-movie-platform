@@ -7,6 +7,10 @@ type Props = {
   onClose: () => void;
 };
 
+type AuthModalController = ReturnType<typeof useAuthModal>;
+
+type AuthModalMode = AuthModalController["mode"];
+
 function FieldWrapper({
   children,
   hasError,
@@ -35,7 +39,7 @@ function AuthModalHeader() {
   );
 }
 
-function AuthModalTitle({ mode }: { mode: ReturnType<typeof useAuthModal>["mode"] }) {
+function AuthModalTitle({ mode }: { mode: AuthModalMode }) {
   return mode === "register" ? <div className="auth-modal__title">Регистрация</div> : null;
 }
 
@@ -43,7 +47,7 @@ function AuthModalEmailField({
   submitted,
   formValues,
   setFormField,
-}: Pick<ReturnType<typeof useAuthModal>, "submitted" | "formValues" | "setFormField">) {
+}: Pick<AuthModalController, "submitted" | "formValues" | "setFormField">) {
   return (
     <FieldWrapper hasError={submitted && !formValues.email.trim()}>
       <input className="auth-modal__input" type="email" placeholder="Электронная почта" value={formValues.email} onChange={(event) => setFormField("email", event.target.value)} />
@@ -51,7 +55,7 @@ function AuthModalEmailField({
   );
 }
 
-function AuthModalRegisterFields({ mode, submitted, formValues, setFormField }: Pick<ReturnType<typeof useAuthModal>, "mode" | "submitted" | "formValues" | "setFormField">) {
+function AuthModalRegisterFields({ mode, submitted, formValues, setFormField }: Pick<AuthModalController, "mode" | "submitted" | "formValues" | "setFormField">) {
   if (mode !== "register") {
     return null;
   }
@@ -72,7 +76,7 @@ function AuthModalPasswordField({
   submitted,
   formValues,
   setFormField,
-}: Pick<ReturnType<typeof useAuthModal>, "submitted" | "formValues" | "setFormField">) {
+}: Pick<AuthModalController, "submitted" | "formValues" | "setFormField">) {
   return (
     <FieldWrapper hasError={submitted && !formValues.password.trim()}>
       <input className="auth-modal__input" type="password" placeholder="Пароль" value={formValues.password} onChange={(event) => setFormField("password", event.target.value)} />
@@ -85,7 +89,7 @@ function AuthModalPasswordConfirmField({
   submitted,
   formValues,
   setFormField,
-}: Pick<ReturnType<typeof useAuthModal>, "mode" | "submitted" | "formValues" | "setFormField">) {
+}: Pick<AuthModalController, "mode" | "submitted" | "formValues" | "setFormField">) {
   if (mode !== "register") {
     return null;
   }
@@ -97,7 +101,7 @@ function AuthModalPasswordConfirmField({
   );
 }
 
-function getAuthSubmitLabel(mode: ReturnType<typeof useAuthModal>["mode"], loading: boolean) {
+function getAuthSubmitLabel(mode: AuthModalMode, loading: boolean) {
   if (mode === "login") {
     return loading ? "Вход..." : "Войти";
   }
@@ -108,7 +112,7 @@ function getAuthSubmitLabel(mode: ReturnType<typeof useAuthModal>["mode"], loadi
 function AuthModalSubmitButton({
   mode,
   loading,
-}: Pick<ReturnType<typeof useAuthModal>, "mode" | "loading">) {
+}: Pick<AuthModalController, "mode" | "loading">) {
   return <button type="submit" className="auth-modal__primary" disabled={loading}>{getAuthSubmitLabel(mode, loading)}</button>;
 }
 
@@ -116,7 +120,7 @@ function AuthModalFooter({
   mode,
   goLogin,
   goRegister,
-}: Pick<ReturnType<typeof useAuthModal>, "mode" | "goLogin" | "goRegister">) {
+}: Pick<AuthModalController, "mode" | "goLogin" | "goRegister">) {
   return (
     <div className="auth-modal__footer">
       {mode === "login" ? <button type="button" className="auth-modal__link" onClick={goRegister}>Регистрация</button> : <button type="button" className="auth-modal__link" onClick={goLogin}>У меня есть пароль</button>}
@@ -124,30 +128,30 @@ function AuthModalFooter({
   );
 }
 
-function AuthModalForm(authModal: ReturnType<typeof useAuthModal>) {
+function AuthModalForm(authController: AuthModalController) {
   return (
-    <form onSubmit={authModal.onSubmit} className="auth-modal__form" noValidate>
-      <AuthModalEmailField submitted={authModal.submitted} formValues={authModal.formValues} setFormField={authModal.setFormField} />
-      <AuthModalRegisterFields mode={authModal.mode} submitted={authModal.submitted} formValues={authModal.formValues} setFormField={authModal.setFormField} />
-      <AuthModalPasswordField submitted={authModal.submitted} formValues={authModal.formValues} setFormField={authModal.setFormField} />
-      <AuthModalPasswordConfirmField mode={authModal.mode} submitted={authModal.submitted} formValues={authModal.formValues} setFormField={authModal.setFormField} />
-      <AuthModalSubmitButton mode={authModal.mode} loading={authModal.loading} />
-      {authModal.error ? <div className="auth-modal__error" role="alert">{authModal.error}</div> : null}
+    <form onSubmit={authController.onSubmit} className="auth-modal__form" noValidate>
+      <AuthModalEmailField submitted={authController.submitted} formValues={authController.formValues} setFormField={authController.setFormField} />
+      <AuthModalRegisterFields mode={authController.mode} submitted={authController.submitted} formValues={authController.formValues} setFormField={authController.setFormField} />
+      <AuthModalPasswordField submitted={authController.submitted} formValues={authController.formValues} setFormField={authController.setFormField} />
+      <AuthModalPasswordConfirmField mode={authController.mode} submitted={authController.submitted} formValues={authController.formValues} setFormField={authController.setFormField} />
+      <AuthModalSubmitButton mode={authController.mode} loading={authController.loading} />
+      {authController.error ? <div className="auth-modal__error" role="alert">{authController.error}</div> : null}
     </form>
   );
 }
 
 export default function AuthModal({ onClose }: Props) {
-  const authModal = useAuthModal({ onClose });
+  const authController = useAuthModal({ onClose });
   return (
-    <div className="auth-modal" role="dialog" aria-modal="true" data-mode={authModal.mode}>
+    <div className="auth-modal" role="dialog" aria-modal="true" data-mode={authController.mode}>
       <div className="auth-modal__overlay" onClick={onClose} />
       <div className="auth-modal__panel">
         <button type="button" className="auth-modal__close" onClick={onClose}>×</button>
         <AuthModalHeader />
-        <AuthModalTitle mode={authModal.mode} />
-        <AuthModalForm {...authModal} />
-        <AuthModalFooter mode={authModal.mode} goLogin={authModal.goLogin} goRegister={authModal.goRegister} />
+        <AuthModalTitle mode={authController.mode} />
+        <AuthModalForm {...authController} />
+        <AuthModalFooter mode={authController.mode} goLogin={authController.goLogin} goRegister={authController.goRegister} />
       </div>
     </div>
   );
