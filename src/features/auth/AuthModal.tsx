@@ -34,7 +34,10 @@ function FieldWrapper({
 function AuthModalHeader() {
   return (
     <div className="auth-modal__header">
-      <img src={logo} alt="Маруся" className="auth-modal__logo" />
+      <div className="auth-modal__logo-mark" aria-hidden="true">
+        <img src={logo} alt="" className="auth-modal__logo" />
+      </div>
+      <span className="auth-modal__logo-text">маруся</span>
     </div>
   );
 }

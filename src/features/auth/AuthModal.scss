@@ -53,15 +53,34 @@
 
 .auth-modal__header {
     display: flex;
+    align-items: center;
+    gap: 14px;
     justify-content: center;
     margin-bottom: 16px;
+}
+
+.auth-modal__logo-mark {
+    width: 34px;
+    height: 32px;
+    overflow: hidden;
+    flex: 0 0 auto;
 }
 
 .auth-modal__logo {
     height: 32px;
     width: 144px;
+    max-width: none;
     display: block;
     margin: 0;
+}
+
+.auth-modal__logo-text {
+    color: $color-black;
+    font-family: $ff-base;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.02em;
 }
 
 .auth-modal__title {
