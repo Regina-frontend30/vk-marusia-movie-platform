@@ -14,22 +14,29 @@ type MoviePageData = {
   movieDetails: Movie | null;
 };
 
-async function loadMovieDetailsData(id: string | undefined) {
+type MoviePageStateSetters = {
+  setMovieDetails: React.Dispatch<React.SetStateAction<Movie | null>>;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
+async function loadMovieDetails(id: string | undefined) {
   const response = await fetch(`${BASE_URL}/movie/${id}`);
   return response.json();
 }
 
-async function loadMoviePageState(args: {
+async function loadMoviePageState({
+  id,
+  setMovieDetails,
+  setLoading,
+}: {
   id: string | undefined;
-  setMovieDetails: React.Dispatch<React.SetStateAction<Movie | null>>;
-  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
-}) {
+} & MoviePageStateSetters) {
   try {
-    args.setMovieDetails(await loadMovieDetailsData(args.id));
+    setMovieDetails(await loadMovieDetails(id));
   } catch (error) {
     console.error(error);
   } finally {
-    args.setLoading(false);
+    setLoading(false);
   }
 }
 
@@ -123,20 +130,20 @@ function MoviePageHeroImage({ movieDetails }: { movieDetails: Movie }) {
   return <img className="movie-page__image" src={movieDetails.backdropUrl} alt={movieDetails.title} />;
 }
 
-function MoviePageHero(props: MoviePageContentProps) {
+function MoviePageHero(contentProps: MoviePageContentProps) {
   return (
     <div className="movie-page__hero">
-      <MoviePageHeroInfo {...props} />
-      <MoviePageHeroImage movieDetails={props.movieDetails} />
+      <MoviePageHeroInfo {...contentProps} />
+      <MoviePageHeroImage movieDetails={contentProps.movieDetails} />
     </div>
   );
 }
 
-function MoviePageContent(props: MoviePageContentProps) {
+function MoviePageContent(contentProps: MoviePageContentProps) {
   return (
     <section className="movie-page container">
-      <MoviePageHero {...props} />
-      <MoviePageAbout movieDetails={props.movieDetails} />
+      <MoviePageHero {...contentProps} />
+      <MoviePageAbout movieDetails={contentProps.movieDetails} />
     </section>
   );
 }

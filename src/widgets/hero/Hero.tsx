@@ -16,7 +16,7 @@ type HeroController = ReturnType<typeof useHeroController>;
 
 type HeroContentProps = Props & {
   hasTrailer: boolean;
-  controller: HeroController;
+  heroController: HeroController;
 };
 
 type HeroActionsProps = {
@@ -129,13 +129,18 @@ function useHeroController(movieId: number) {
   };
 }
 
-function HeroInfo({ movie, onRefresh, hasTrailer, controller }: HeroContentProps) {
+function HeroInfo({
+  movie,
+  onRefresh,
+  hasTrailer,
+  heroController,
+}: HeroContentProps) {
   return (
     <div className="hero__info">
       <HeroMeta movie={movie} />
       <h1 className="hero__title">{movie.title}</h1>
       <p className="hero__description">{movie.plot}</p>
-      <HeroActions hasTrailer={hasTrailer} favoriteController={controller.favoriteController} onOpenTrailer={controller.openTrailer} onOpenMovie={controller.openMovie} onRefresh={onRefresh} />
+      <HeroActions hasTrailer={hasTrailer} favoriteController={heroController.favoriteController} onOpenTrailer={heroController.openTrailer} onOpenMovie={heroController.openMovie} onRefresh={onRefresh} />
     </div>
   );
 }
@@ -144,35 +149,39 @@ function HeroImage({ movie }: Pick<HeroContentProps, "movie">) {
   return <img className="hero__image" src={movie.backdropUrl} alt={movie.title} />;
 }
 
-function HeroContentLayout(props: HeroContentProps) {
+function HeroContentLayout(contentProps: HeroContentProps) {
   return (
     <div className="hero__content container">
-      <HeroInfo {...props} />
-      <HeroImage movie={props.movie} />
+      <HeroInfo {...contentProps} />
+      <HeroImage movie={contentProps.movie} />
     </div>
   );
 }
 
-function HeroOverlays({ movie, hasTrailer, controller }: Pick<HeroContentProps, "movie" | "hasTrailer" | "controller">) {
+function HeroOverlays({
+  movie,
+  hasTrailer,
+  heroController,
+}: Pick<HeroContentProps, "movie" | "hasTrailer" | "heroController">) {
   return (
     <>
-      <HeroTrailerModal isOpen={controller.isTrailerOpen} hasTrailer={hasTrailer} movie={movie} onClose={controller.closeTrailer} />
-      {controller.favoriteController.isAuthOpen ? <AuthModal onClose={controller.favoriteController.closeAuth} /> : null}
+      <HeroTrailerModal isOpen={heroController.isTrailerOpen} hasTrailer={hasTrailer} movie={movie} onClose={heroController.closeTrailer} />
+      {heroController.favoriteController.isAuthOpen ? <AuthModal onClose={heroController.favoriteController.closeAuth} /> : null}
     </>
   );
 }
 
-function HeroContent(props: HeroContentProps) {
+function HeroContent(contentProps: HeroContentProps) {
   return (
     <section className="hero">
-      <HeroContentLayout {...props} />
-      <HeroOverlays movie={props.movie} hasTrailer={props.hasTrailer} controller={props.controller} />
+      <HeroContentLayout {...contentProps} />
+      <HeroOverlays movie={contentProps.movie} hasTrailer={contentProps.hasTrailer} heroController={contentProps.heroController} />
     </section>
   );
 }
 
 export default function Hero({ movie, onRefresh }: Props) {
-  const controller = useHeroController(movie.id);
+  const heroController = useHeroController(movie.id);
   const hasTrailer = Boolean(movie.trailerYouTubeId || movie.trailerUrl);
-  return <HeroContent movie={movie} onRefresh={onRefresh} hasTrailer={hasTrailer} controller={controller} />;
+  return <HeroContent movie={movie} onRefresh={onRefresh} hasTrailer={hasTrailer} heroController={heroController} />;
 }

@@ -2,18 +2,32 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { searchMovies } from "../shared/api/movies";
 import type { Movie } from "../shared/types/movie";
 
-async function loadSearchResults(args: {
-    trimmedQuery: string;
+type SearchResultsLoaderArgs = {
+    searchQuery: string;
     signal: AbortSignal;
     setSearchResults: React.Dispatch<React.SetStateAction<Movie[]>>;
     setSearchLoading: React.Dispatch<React.SetStateAction<boolean>>;
-}) {
+};
+
+type SearchStateSetters = {
+    setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
+    setSearchResults: React.Dispatch<React.SetStateAction<Movie[]>>;
+    setSearchOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    setSearchLoading: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
+async function loadSearchResults({
+    searchQuery,
+    signal,
+    setSearchResults,
+    setSearchLoading,
+}: SearchResultsLoaderArgs) {
     try {
-        args.setSearchResults(await searchMovies(args.trimmedQuery, args.signal));
+        setSearchResults(await searchMovies(searchQuery, signal));
     } catch {
-        if (!args.signal.aborted) args.setSearchResults([]);
+        if (!signal.aborted) setSearchResults([]);
     } finally {
-        if (!args.signal.aborted) args.setSearchLoading(false);
+        if (!signal.aborted) setSearchLoading(false);
     }
 }
 
@@ -26,7 +40,7 @@ function useSearchResults(
         if (!trimmedQuery) return;
         const controller = new AbortController();
         const timeoutId = window.setTimeout(
-            () => void loadSearchResults({ trimmedQuery, signal: controller.signal, setSearchResults, setSearchLoading }),
+            () => void loadSearchResults({ searchQuery: trimmedQuery, signal: controller.signal, setSearchResults, setSearchLoading }),
             300
         );
         return () => { controller.abort(); window.clearTimeout(timeoutId); };
@@ -34,14 +48,18 @@ function useSearchResults(
     return { searchResults, setSearchResults };
 }
 
-function closeSearchOnOutsideClick(args: {
+function closeSearchOnOutsideClick({
+    searchWrapRef,
+    setSearchOpen,
+    event,
+}: {
     searchWrapRef: React.RefObject<HTMLDivElement | null>;
     setSearchOpen: React.Dispatch<React.SetStateAction<boolean>>;
     event: MouseEvent;
 }) {
-    const node = args.searchWrapRef.current;
-    if (!node || node.contains(args.event.target as Node)) return;
-    args.setSearchOpen(false);
+    const searchNode = searchWrapRef.current;
+    if (!searchNode || searchNode.contains(event.target as Node)) return;
+    setSearchOpen(false);
 }
 
 function useCloseOnOutsideClick(
@@ -58,11 +76,7 @@ function useCloseOnOutsideClick(
 
 function applySearchValue(args: {
     value: string;
-    setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
-    setSearchResults: React.Dispatch<React.SetStateAction<Movie[]>>;
-    setSearchOpen: React.Dispatch<React.SetStateAction<boolean>>;
-    setSearchLoading: React.Dispatch<React.SetStateAction<boolean>>;
-}) {
+} & SearchStateSetters) {
     args.setSearchQuery(args.value);
 
     if (!args.value.trim()) {
@@ -76,14 +90,9 @@ function applySearchValue(args: {
     args.setSearchOpen(true);
 }
 
-function createSearchChangeHandler(args: {
-    setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
-    setSearchResults: React.Dispatch<React.SetStateAction<Movie[]>>;
-    setSearchOpen: React.Dispatch<React.SetStateAction<boolean>>;
-    setSearchLoading: React.Dispatch<React.SetStateAction<boolean>>;
-}) {
+function createSearchChangeHandler(searchSetters: SearchStateSetters) {
     return function onChangeSearch(value: string) {
-        applySearchValue({ value, setSearchQuery: args.setSearchQuery, setSearchResults: args.setSearchResults, setSearchOpen: args.setSearchOpen, setSearchLoading: args.setSearchLoading });
+        applySearchValue({ value, ...searchSetters });
     };
 }
 
@@ -96,25 +105,21 @@ function createSearchFocusHandler(args: {
     };
 }
 
-function createClearSearchHandler(args: {
-    setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
-    setSearchResults: React.Dispatch<React.SetStateAction<Movie[]>>;
-    setSearchOpen: React.Dispatch<React.SetStateAction<boolean>>;
-}) {
+function createClearSearchHandler({
+    setSearchQuery,
+    setSearchResults,
+    setSearchOpen,
+}: Pick<SearchStateSetters, "setSearchQuery" | "setSearchResults" | "setSearchOpen">) {
     return function clearSearch() {
-        args.setSearchQuery("");
-        args.setSearchResults([]);
-        args.setSearchOpen(false);
+        setSearchQuery("");
+        setSearchResults([]);
+        setSearchOpen(false);
     };
 }
 
 function useSearchControls(args: {
     searchQuery: string;
-    setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
-    setSearchResults: React.Dispatch<React.SetStateAction<Movie[]>>;
-    setSearchOpen: React.Dispatch<React.SetStateAction<boolean>>;
-    setSearchLoading: React.Dispatch<React.SetStateAction<boolean>>;
-}) {
+} & SearchStateSetters) {
     return {
         onChangeSearch: createSearchChangeHandler(args),
         onFocusSearch: createSearchFocusHandler(args),
