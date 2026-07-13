@@ -4,7 +4,9 @@ import TopMovies from "../../widgets/top-movies/TopMovies";
 import { getRandomMovie, getTopMovies } from "../../shared/api/movies";
 import type { Movie } from "../../shared/types/movie";
 
-async function loadFeaturedMovie(setFeaturedMovie: (movie: Movie) => void) {
+async function loadRandomFeaturedMovie(
+  setFeaturedMovie: (movie: Movie) => void
+) {
   try {
     const randomMovie = await getRandomMovie();
     setFeaturedMovie(randomMovie);
@@ -20,6 +22,16 @@ async function loadTopMoviesList(setTopMovies: (movies: Movie[]) => void) {
   } catch (error) {
     console.error(error);
   }
+}
+
+async function loadHomePageData(args: {
+  setFeaturedMovie: (movie: Movie) => void;
+  setTopMovies: (movies: Movie[]) => void;
+}) {
+  await Promise.all([
+    loadRandomFeaturedMovie(args.setFeaturedMovie),
+    loadTopMoviesList(args.setTopMovies),
+  ]);
 }
 
 function HomePageContent({
@@ -42,18 +54,13 @@ function HomePageContent({
 export default function HomePage() {
   const [featuredMovie, setFeaturedMovie] = useState<Movie | null>(null);
   const [topMovies, setTopMovies] = useState<Movie[]>([]);
-
-  const loadRandomMovie = () => loadFeaturedMovie(setFeaturedMovie);
-  const loadTopMovies = () => loadTopMoviesList(setTopMovies);
+  const refreshFeaturedMovie = () => loadRandomFeaturedMovie(setFeaturedMovie);
 
   useEffect(() => {
-    queueMicrotask(() => {
-      void loadRandomMovie();
-      void loadTopMovies();
-    });
+    void loadHomePageData({ setFeaturedMovie, setTopMovies });
   }, []);
 
   if (!featuredMovie) return <div>Загрузка...</div>;
 
-  return <HomePageContent featuredMovie={featuredMovie} topMovies={topMovies} onRefresh={loadRandomMovie} />;
+  return <HomePageContent featuredMovie={featuredMovie} topMovies={topMovies} onRefresh={refreshFeaturedMovie} />;
 }
