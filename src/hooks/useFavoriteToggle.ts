@@ -102,7 +102,9 @@ async function updateFavoriteMovie(args: {
   await args.refreshUser();
 }
 
-function shouldOpenFavoriteAuth(args: Pick<ToggleFavoriteArgs, "user" | "setIsAuthOpen">) {
+function openFavoriteAuthIfNeeded(
+  args: Pick<ToggleFavoriteArgs, "user" | "setIsAuthOpen">
+) {
   if (args.user) {
     return false;
   }
@@ -113,7 +115,7 @@ function shouldOpenFavoriteAuth(args: Pick<ToggleFavoriteArgs, "user" | "setIsAu
 
 async function toggleFavoriteMovie(args: ToggleFavoriteArgs) {
   const movieId = args.movieId;
-  if (shouldOpenFavoriteAuth(args)) return;
+  if (openFavoriteAuthIfNeeded(args)) return;
   if (movieId === null || args.loading) return;
 
   try {

@@ -109,7 +109,7 @@ function createShowMoreHandler(args: {
     };
 }
 
-async function loadGenreMoviesState(args: {
+async function loadGenreMoviesIntoState(args: {
     genreName: string;
     moviesPageSize: number;
     setMovies: (movies: Movie[]) => void;
@@ -128,7 +128,7 @@ async function loadGenreMoviesState(args: {
     }
 }
 
-async function loadGenresState(args: {
+async function loadGenreCardsIntoState(args: {
     setGenres: (genres: GenreCard[]) => void;
     setLoading: (loading: boolean) => void;
 }) {
@@ -150,7 +150,7 @@ function useGenresData({
     setLoading: (loading: boolean) => void;
 }) {
     useEffect(() => {
-        void loadGenresState({ setGenres, setLoading });
+        void loadGenreCardsIntoState({ setGenres, setLoading });
     }, [setGenres, setLoading]);
 }
 
@@ -163,7 +163,7 @@ function useGenreMoviesEffect({
 }: GenreMoviesEffectArgs) {
     useEffect(() => {
         if (!genreName) return;
-        void loadGenreMoviesState({
+        void loadGenreMoviesIntoState({
             genreName,
             moviesPageSize,
             setMovies,

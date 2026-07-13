@@ -37,7 +37,7 @@ type SubmitHandlerArgs = {
     setMode: (mode: AuthMode) => void;
 };
 
-function isLoginFormInvalid(formValues: {
+function hasEmptyAuthCredentials(formValues: {
     email: string;
     password: string;
 }) {
@@ -171,7 +171,7 @@ async function submitAuthByMode(args: SubmitHandlerArgs) {
 
 async function submitAuthForm(args: SubmitHandlerArgs) {
     resetSubmitState(args);
-    if (isLoginFormInvalid(args.formValues)) return;
+    if (hasEmptyAuthCredentials(args.formValues)) return;
     args.setLoading(true);
     try {
         await submitAuthByMode(args);
