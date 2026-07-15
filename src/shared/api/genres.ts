@@ -4,7 +4,8 @@ const BASE_URL = "https://cinemaguide.skillbox.cc";
 
 export async function getGenres(): Promise<Genre[]> {
     const response = await fetch(
-        `${BASE_URL}/movie/genres`
+        `${BASE_URL}/movie/genres`,
+        { credentials: "include" }
     );
 
     if (!response.ok) {

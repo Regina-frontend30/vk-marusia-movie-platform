@@ -3,7 +3,9 @@ import type { Movie } from "../types/movie";
 const BASE_URL = "https://cinemaguide.skillbox.cc";
 
 export async function getRandomMovie() {
-    const response = await fetch(`${BASE_URL}/movie/random`);
+    const response = await fetch(`${BASE_URL}/movie/random`, {
+        credentials: "include",
+    });
 
     if (!response.ok) {
         throw new Error("Ошибка загрузки фильма");
@@ -13,7 +15,9 @@ export async function getRandomMovie() {
 }
 
 export async function getTopMovies() {
-    const response = await fetch(`${BASE_URL}/movie/top10`);
+    const response = await fetch(`${BASE_URL}/movie/top10`, {
+        credentials: "include",
+    });
 
     if (!response.ok) {
         throw new Error("Ошибка загрузки топа");
@@ -25,7 +29,9 @@ export async function getTopMovies() {
 export async function getMovieById(
     id: string | number
 ): Promise<Movie> {
-    const response = await fetch(`${BASE_URL}/movie/${id}`);
+    const response = await fetch(`${BASE_URL}/movie/${id}`, {
+        credentials: "include",
+    });
 
     if (!response.ok) {
         throw new Error("Ошибка загрузки фильма");
@@ -38,7 +44,8 @@ export async function getMoviesByGenre(
     genre: string
 ): Promise<Movie[]> {
     const response = await fetch(
-        `${BASE_URL}/movie?genre=${encodeURIComponent(genre)}`
+        `${BASE_URL}/movie?genre=${encodeURIComponent(genre)}`,
+        { credentials: "include" }
     );
 
     if (!response.ok) {
@@ -54,7 +61,7 @@ export async function searchMovies(
 ): Promise<Movie[]> {
     const response = await fetch(
         `${BASE_URL}/movie?title=${encodeURIComponent(query)}`,
-        { signal }
+        { credentials: "include", signal }
     );
 
     if (!response.ok) {
