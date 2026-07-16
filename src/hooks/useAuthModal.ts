@@ -25,9 +25,18 @@ type AuthFormValues = {
     passwordConfirm: string;
 };
 
+type AuthFieldErrors = {
+    email: boolean;
+    password: boolean;
+    firstName: boolean;
+    lastName: boolean;
+    passwordConfirm: boolean;
+};
+
 type SubmitHandlerArgs = {
     mode: AuthMode;
     formValues: AuthFormValues;
+    fieldErrors: AuthFieldErrors;
     setSubmitted: (value: boolean) => void;
     setError: (value: string | null) => void;
     setLoading: (value: boolean) => void;
@@ -37,45 +46,50 @@ type SubmitHandlerArgs = {
     setMode: (mode: AuthMode) => void;
 };
 
-function hasEmptyAuthCredentials(formValues: {
-    email: string;
-    password: string;
-}) {
-    return (
-        !formValues.email.trim() ||
-        !formValues.password.trim()
-    );
+function hasValidEmail(email: string) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 }
 
-function hasEmptyRegisterFields(formValues: {
-    firstName: string;
-    lastName: string;
-    passwordConfirm: string;
-}) {
-    return (
-        !formValues.firstName.trim() ||
-        !formValues.lastName.trim() ||
-        !formValues.passwordConfirm.trim()
-    );
+function hasValidName(name: string) {
+    const trimmedName = name.trim();
+    return trimmedName.length >= 2 && /^[A-Za-zА-Яа-яЁё -]+$/u.test(trimmedName);
 }
 
-function getRegisterError(formValues: {
-    firstName: string;
-    lastName: string;
-    password: string;
-    passwordConfirm: string;
+function hasLoginPassword(password: string) {
+    return Boolean(password.trim());
+}
+
+function hasStrongPassword(password: string) {
+    const trimmedPassword = password.trim();
+    return trimmedPassword.length >= 6 && /[A-Za-zА-Яа-яЁё]/u.test(trimmedPassword) && /\d/.test(trimmedPassword);
+}
+
+function hasMatchingPasswords(formValues: AuthFormValues) {
+    return Boolean(formValues.passwordConfirm.trim()) && formValues.password === formValues.passwordConfirm;
+}
+
+function getAuthFieldErrors(args: {
+    mode: AuthMode;
+    formValues: AuthFormValues;
+}): AuthFieldErrors {
+    const isRegisterMode = args.mode === "register";
+    return {
+        email: !hasValidEmail(args.formValues.email),
+        password: isRegisterMode ? !hasStrongPassword(args.formValues.password) : !hasLoginPassword(args.formValues.password),
+        firstName: isRegisterMode && !hasValidName(args.formValues.firstName),
+        lastName: isRegisterMode && !hasValidName(args.formValues.lastName),
+        passwordConfirm: isRegisterMode && !hasMatchingPasswords(args.formValues),
+    };
+}
+
+function getValidationErrorMessage(args: {
+    mode: AuthMode;
+    fieldErrors: AuthFieldErrors;
 }) {
-    if (hasEmptyRegisterFields(formValues)) {
-        return "Заполните все поля регистрации";
-    }
-
-    if (
-        formValues.password !==
-        formValues.passwordConfirm
-    ) {
-        return "Пароли не совпадают";
-    }
-
+    if (args.fieldErrors.email) return "Введите корректную электронную почту";
+    if (args.fieldErrors.password) return args.mode === "register" ? "Пароль должен быть не короче 6 символов и содержать буквы и цифры" : "Введите пароль";
+    if (args.fieldErrors.firstName || args.fieldErrors.lastName) return "Имя и фамилия должны содержать не менее 2 букв";
+    if (args.fieldErrors.passwordConfirm) return "Пароли не совпадают";
     return null;
 }
 
@@ -107,33 +121,11 @@ async function submitLogin(args: {
 }
 
 async function submitRegister(args: {
-    formValues: {
-        email: string;
-        password: string;
-        firstName: string;
-        lastName: string;
-        passwordConfirm: string;
-    };
-    setError: (message: string) => void;
+    formValues: AuthFormValues;
     setMode: (mode: AuthMode) => void;
 }) {
-    const registerError = getRegisterError(args.formValues);
-    if (applyRegisterError(registerError, args.setError)) return;
-
     await register(createRegisterPayload(args.formValues));
     args.setMode("success");
-}
-
-function applyRegisterError(
-    registerError: string | null,
-    setError: (message: string) => void,
-) {
-    if (!registerError) {
-        return false;
-    }
-
-    setError(registerError);
-    return true;
 }
 
 function handleAuthError(
@@ -165,13 +157,17 @@ async function submitAuthByMode(args: SubmitHandlerArgs) {
     }
 
     if (args.mode === "register") {
-        await submitRegister({ formValues: args.formValues, setError: args.setError as (message: string) => void, setMode: args.setMode });
+        await submitRegister({ formValues: args.formValues, setMode: args.setMode });
     }
 }
 
 async function submitAuthForm(args: SubmitHandlerArgs) {
     resetSubmitState(args);
-    if (hasEmptyAuthCredentials(args.formValues)) return;
+    const validationError = getValidationErrorMessage({ mode: args.mode, fieldErrors: args.fieldErrors });
+    if (validationError) {
+        args.setError(validationError);
+        return;
+    }
     args.setLoading(true);
     try {
         await submitAuthByMode(args);
@@ -222,6 +218,7 @@ export function useAuthModal({
     const navigate = useNavigate();
     const { refreshUser } = useAuth();
     const formState = useAuthFormState();
-    const onSubmit = createSubmitHandler({ mode: formState.mode, formValues: formState.formValues, setSubmitted: formState.setSubmitted, setError: formState.setError, setLoading: formState.setLoading, refreshUser, onClose, navigate, setMode: formState.setMode });
-    return { ...formState, onSubmit };
+    const fieldErrors = getAuthFieldErrors({ mode: formState.mode, formValues: formState.formValues });
+    const onSubmit = createSubmitHandler({ mode: formState.mode, formValues: formState.formValues, fieldErrors, setSubmitted: formState.setSubmitted, setError: formState.setError, setLoading: formState.setLoading, refreshUser, onClose, navigate, setMode: formState.setMode });
+    return { ...formState, fieldErrors, onSubmit };
 }

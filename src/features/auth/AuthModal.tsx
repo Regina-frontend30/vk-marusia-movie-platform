@@ -48,27 +48,28 @@ function AuthModalTitle({ mode }: { mode: AuthModalMode }) {
 
 function AuthModalEmailField({
   submitted,
+  fieldErrors,
   formValues,
   setFormField,
-}: Pick<AuthModalController, "submitted" | "formValues" | "setFormField">) {
+}: Pick<AuthModalController, "submitted" | "fieldErrors" | "formValues" | "setFormField">) {
   return (
-    <FieldWrapper hasError={submitted && !formValues.email.trim()}>
+    <FieldWrapper hasError={submitted && fieldErrors.email}>
       <input className="auth-modal__input" type="email" placeholder="Электронная почта" value={formValues.email} onChange={(event) => setFormField("email", event.target.value)} />
     </FieldWrapper>
   );
 }
 
-function AuthModalRegisterFields({ mode, submitted, formValues, setFormField }: Pick<AuthModalController, "mode" | "submitted" | "formValues" | "setFormField">) {
+function AuthModalRegisterFields({ mode, submitted, fieldErrors, formValues, setFormField }: Pick<AuthModalController, "mode" | "submitted" | "fieldErrors" | "formValues" | "setFormField">) {
   if (mode !== "register") {
     return null;
   }
 
   return (
     <>
-      <FieldWrapper hasError={submitted && !formValues.firstName.trim()}>
+      <FieldWrapper hasError={submitted && fieldErrors.firstName}>
         <input className="auth-modal__input" type="text" placeholder="Имя" value={formValues.firstName} onChange={(event) => setFormField("firstName", event.target.value)} />
       </FieldWrapper>
-      <FieldWrapper hasError={submitted && !formValues.lastName.trim()}>
+      <FieldWrapper hasError={submitted && fieldErrors.lastName}>
         <input className="auth-modal__input" type="text" placeholder="Фамилия" value={formValues.lastName} onChange={(event) => setFormField("lastName", event.target.value)} />
       </FieldWrapper>
     </>
@@ -77,11 +78,12 @@ function AuthModalRegisterFields({ mode, submitted, formValues, setFormField }: 
 
 function AuthModalPasswordField({
   submitted,
+  fieldErrors,
   formValues,
   setFormField,
-}: Pick<AuthModalController, "submitted" | "formValues" | "setFormField">) {
+}: Pick<AuthModalController, "submitted" | "fieldErrors" | "formValues" | "setFormField">) {
   return (
-    <FieldWrapper hasError={submitted && !formValues.password.trim()}>
+    <FieldWrapper hasError={submitted && fieldErrors.password}>
       <input className="auth-modal__input" type="password" placeholder="Пароль" value={formValues.password} onChange={(event) => setFormField("password", event.target.value)} />
     </FieldWrapper>
   );
@@ -90,15 +92,16 @@ function AuthModalPasswordField({
 function AuthModalPasswordConfirmField({
   mode,
   submitted,
+  fieldErrors,
   formValues,
   setFormField,
-}: Pick<AuthModalController, "mode" | "submitted" | "formValues" | "setFormField">) {
+}: Pick<AuthModalController, "mode" | "submitted" | "fieldErrors" | "formValues" | "setFormField">) {
   if (mode !== "register") {
     return null;
   }
 
   return (
-    <FieldWrapper hasError={submitted && !formValues.passwordConfirm.trim()}>
+    <FieldWrapper hasError={submitted && fieldErrors.passwordConfirm}>
       <input className="auth-modal__input" type="password" placeholder="Подтвердите пароль" value={formValues.passwordConfirm} onChange={(event) => setFormField("passwordConfirm", event.target.value)} />
     </FieldWrapper>
   );
@@ -134,10 +137,10 @@ function AuthModalFooter({
 function AuthModalForm(authController: AuthModalController) {
   return (
     <form onSubmit={authController.onSubmit} className="auth-modal__form" noValidate>
-      <AuthModalEmailField submitted={authController.submitted} formValues={authController.formValues} setFormField={authController.setFormField} />
-      <AuthModalRegisterFields mode={authController.mode} submitted={authController.submitted} formValues={authController.formValues} setFormField={authController.setFormField} />
-      <AuthModalPasswordField submitted={authController.submitted} formValues={authController.formValues} setFormField={authController.setFormField} />
-      <AuthModalPasswordConfirmField mode={authController.mode} submitted={authController.submitted} formValues={authController.formValues} setFormField={authController.setFormField} />
+      <AuthModalEmailField submitted={authController.submitted} fieldErrors={authController.fieldErrors} formValues={authController.formValues} setFormField={authController.setFormField} />
+      <AuthModalRegisterFields mode={authController.mode} submitted={authController.submitted} fieldErrors={authController.fieldErrors} formValues={authController.formValues} setFormField={authController.setFormField} />
+      <AuthModalPasswordField submitted={authController.submitted} fieldErrors={authController.fieldErrors} formValues={authController.formValues} setFormField={authController.setFormField} />
+      <AuthModalPasswordConfirmField mode={authController.mode} submitted={authController.submitted} fieldErrors={authController.fieldErrors} formValues={authController.formValues} setFormField={authController.setFormField} />
       <AuthModalSubmitButton mode={authController.mode} loading={authController.loading} />
       {authController.error ? <div className="auth-modal__error" role="alert">{authController.error}</div> : null}
     </form>
