@@ -6,8 +6,7 @@ import spriteUrl from "../../assets/sprite/sprite.svg";
 import AuthModal from "../../features/auth/AuthModal";
 import TrailerModal from "../../shared/ui/trailer-modal/TrailerModal";
 import { useFavoriteToggle } from "../../hooks/useFavoriteToggle";
-
-const BASE_URL = "https://cinemaguide.skillbox.cc";
+import { getMovieById } from "../../shared/api/movies";
 
 type MoviePageData = {
   loading: boolean;
@@ -20,8 +19,11 @@ type MoviePageStateSetters = {
 };
 
 async function loadMovieDetails(id: string | undefined) {
-  const response = await fetch(`${BASE_URL}/movie/${id}`);
-  return response.json();
+  if (!id) {
+    return null;
+  }
+
+  return getMovieById(id);
 }
 
 async function loadMoviePageState({
@@ -35,6 +37,7 @@ async function loadMoviePageState({
     setMovieDetails(await loadMovieDetails(id));
   } catch (error) {
     console.error(error);
+    setMovieDetails(null);
   } finally {
     setLoading(false);
   }

@@ -126,12 +126,17 @@ function normalizeFavoriteIds(
 }
 
 async function fetchFavoriteMovies(favoriteIds: string[]) {
-  return Promise.all(
-    favoriteIds.map((favoriteId) =>
-      getMovieById(favoriteId)
-    )
+  const favoriteResults = await Promise.allSettled(
+    favoriteIds.map((favoriteId) => getMovieById(favoriteId))
+  );
+
+  return favoriteResults.flatMap((favoriteResult) =>
+    favoriteResult.status === "fulfilled"
+      ? [favoriteResult.value]
+      : []
   );
 }
+
 
 async function loadFavoriteMoviesData(
   args: FavoriteMoviesLoaderArgs
